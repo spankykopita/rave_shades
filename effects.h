@@ -258,88 +258,6 @@ void slantBars() {
 
 }
 
-
-#define NORMAL 0
-#define RAINBOW 1
-#define charSpacing 2
-// Scroll a text string
-void scrollText(byte message, byte style, CRGB fgColor, CRGB bgColor) {
-  static byte currentMessageChar = 0;
-  static byte currentCharColumn = 0;
-  static byte paletteCycle = 0;
-  static CRGB currentColor;
-  static byte bitBuffer[16] = {0};
-  static byte bitBufferPointer = 0;
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 35;
-    currentMessageChar = 0;
-    currentCharColumn = 0;
-    selectFlashString(message);
-    loadCharBuffer(loadStringChar(message, currentMessageChar));
-    currentPalette = RainbowColors_p;
-    for (byte i = 0; i < kMatrixWidth; i++) bitBuffer[i] = 0;
-    fadeActive = 0;
-  }
-
-  paletteCycle += 15;
-
-  if (currentCharColumn < 5) { // characters are 5 pixels wide
-    bitBuffer[(bitBufferPointer + kMatrixWidth - 1) % kMatrixWidth] = charBuffer[currentCharColumn]; // character
-  } else {
-    bitBuffer[(bitBufferPointer + kMatrixWidth - 1) % kMatrixWidth] = 0; // space
-  }
-
-  CRGB pixelColor;
-  for (byte x = 0; x < kMatrixWidth; x++) {
-    for (byte y = 0; y < 5; y++) { // characters are 5 pixels tall
-      if (bitRead(bitBuffer[(bitBufferPointer + x) % kMatrixWidth], y) == 1) {
-        if (style == RAINBOW) {
-          pixelColor = ColorFromPalette(currentPalette, paletteCycle+y*16, 255);
-        } else {
-          pixelColor = fgColor;
-        }
-      } else {
-        pixelColor = bgColor;
-      }
-      leds[XY(x, y)] = pixelColor;
-    }
-  }
-
-  currentCharColumn++;
-  if (currentCharColumn > (4 + charSpacing)) {
-    currentCharColumn = 0;
-    currentMessageChar++;
-    char nextChar = loadStringChar(message, currentMessageChar);
-    if (nextChar == 0) { // null character at end of strong
-      currentMessageChar = 0;
-      nextChar = loadStringChar(message, currentMessageChar);
-    }
-    loadCharBuffer(nextChar);
-  }
-
-  bitBufferPointer++;
-  if (bitBufferPointer > 15) bitBufferPointer = 0;
-
-}
-
-
-void scrollTextZero() {
-  scrollText(0, NORMAL, CRGB::Red, CRGB::Black);
-}
-
-void scrollTextOne() {
-  scrollText(1, RAINBOW, 0, CRGB::Black);
-}
-
-void scrollTextTwo() {
-  scrollText(2, NORMAL, CRGB::Green, CRGB(0,0,8));
-}
-
-
-
 #define analyzerFadeFactor 5
 #define analyzerScaleFactor 1.5
 #define analyzerPaletteFactor 2
@@ -678,57 +596,7 @@ void audioShadesOutline() {
   
 }
 
-
-//hearts that start small on the bottom and get larger as they grow upward
-const uint8_t SmHeart[] = {46, 48, 53, 55, 60, 65};
-const uint8_t MedHeart[] = {31, 32, 34, 35, 38, 39,
-                            41, 42, 46, 47, 48, 55, 54, 53, 54, 55, 60, 65
-                           };
-const uint8_t LrgHeart[] = {15, 16, 18, 19, 24, 25,
-                            27, 28, 31, 32, 33, 34, 35, 38, 39, 40, 41, 42,
-                            46, 47, 48, 53, 54, 55, 60, 65
-                           };
-const uint8_t HugeHeart[] = {0, 1, 3, 4, 9, 10, 12,
-                             13, 14, 15, 16, 17, 18, 19, 20, 23, 24, 25, 26,
-                             27, 28, 29, 31, 32, 33, 34, 35, 38, 39, 40, 41,
-                             42, 46, 47, 48, 53, 54, 55, 60, 65
-                            };
-void hearts() {
-  static boolean erase = false;
-  static uint8_t x, y = 0;
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 150;
-    FastLED.clear();
-    fadeActive = 0;
-
-    x = 0;
-    y = 0;
-  }
-  if (y == 5)
-    y = 0;
-  if (y == 0)
-    for (x = 0; x < 6; x++)
-      leds[SmHeart[x]] = CRGB::Salmon; //Tried to transition from pink-ish to red. Kinda worked.
-  if (y == 1)
-    for (x = 0; x < 18; x++)
-      leds[MedHeart[x]] = CRGB::Tomato;
-  if (y == 2)
-    for (x = 0; x < 26; x++)
-      leds[LrgHeart[x]] = CRGB::Crimson;
-  if (y == 3) {
-    for (x = 0; x < 40; x++)
-      leds[HugeHeart[x]] = CRGB::Red;
-  } //set the delay slightly longer for HUGE heart.
-  if (y == 4)
-    FastLED.clear();
-  y++;
-}
-
-
-
 // Ring pulser
-
 
 void drawRing(int xCenter, int yCenter, float radius, CRGB color) {
   int brightness;

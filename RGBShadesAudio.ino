@@ -58,8 +58,7 @@
 // Include FastLED library and other useful files
 #include <FastLED.h>
 #include <EEPROM.h>
-#include "messages.h"
-#include "font.h"
+#include <Arduino.h>
 #include "XYmap.h"
 #include "utils.h"
 #include "audio.h"
@@ -80,25 +79,22 @@ functionList effectListAudio[] = {
                                  };
 
 functionList effectListNoAudio[] = {
-                                    shadesOutline,
-                                    threeSine,
+                                    // shadesOutline,
+                                    // threeSine,
                                     //drawVU,
-                                    threeDee,
-                                    hearts,
-                                    //scrollTextZero,
-                                    plasma,
+                                    // threeDee,
+                                    // hearts,
+                                    // plasma,
                                     //RGBpulse,
-                                    confetti,
+                                    // confetti,
                                     //audioCirc,
-                                    rider,
-                                    //scrollTextOne,
+                                    // rider,
                                     glitter,
-                                    //drawAnalyzer,
-                                    slantBars,
-                                    //scrollTextTwo,
-                                    //audioPlasma,
+                                    // drawAnalyzer,
+                                    // slantBars,
+                                    // audioPlasma,
                                     colorFill,
-                                    //audioStripes,
+                                    // audioStripes,
                                     sideRain
                                    };
 
@@ -207,8 +203,3 @@ void loop()
   FastLED.show(); // send the contents of the led memory to the LEDs
 
 }
-
-
-
-
-
