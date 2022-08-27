@@ -69,12 +69,11 @@
 functionList effectListAudio[] = {
                                   // rings,
                                   // audioShadesOutline,
-                                  audioStripes,
-                                  audioCirc,
+                                  // audioStripes,
+                                  // audioCirc,
                                   // drawVU,
-                                  // RGBpulse,
-                                  // audioPlasma,
-                                  // drawAnalyzer
+                                  audioPlasma, // TODO test how audio affects velocity
+                                  drawAnalyzer
                                  };
 
 functionList effectListNoAudio[] = {

@@ -316,41 +316,6 @@ void drawVU() {
       leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
   }
-
-
-}
-
-
-void RGBpulse() {
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 1;
-    audioActive = true;
-    fadeActive = 1;
-  }
-
-  static byte RGBcycle = 0;
-
-  if (beatDetect()) {
-
-    switch (RGBcycle) {
-      case 0:
-        fillAll(CRGB::Red);
-        break;
-      case 1:
-        fillAll(CRGB::Lime);
-        break;
-      case 2:
-        fillAll(CRGB::Blue);
-        break;
-    }
-
-    RGBcycle++;
-    if (RGBcycle > 2) RGBcycle = 0;
-  }
-
 }
 
 // RGB Plasma
