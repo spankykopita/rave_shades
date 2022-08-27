@@ -51,15 +51,10 @@ void doAnalogs() {
     delayMicroseconds(30);
 
     // noise floor filter
-    if (spectrumValue[i] < NOISEFLOOR) {
-      spectrumValue[i] = 0;
-    } else {
-      spectrumValue[i] -= NOISEFLOOR;
-    }
+    spectrumValue[i] = max(0, spectrumValue[i] - NOISEFLOOR);
 
     // apply correction factor per frequency bin
-    spectrumValue[i] = (spectrumValue[i]*pgm_read_byte(spectrumFactors+i));
-    spectrumValue[i] /= 10;
+    spectrumValue[i] = spectrumValue[i] * pgm_read_byte(spectrumFactors+i) / 10;
 
     // prepare average for AGC
     analogsum += spectrumValue[i];
@@ -71,17 +66,14 @@ void doAnalogs() {
     spectrumDecay[i] = (1.0 - SPECTRUMSMOOTH) * spectrumDecay[i] + SPECTRUMSMOOTH * spectrumValue[i];
 
     // process peak values
-    if (spectrumPeaks[i] < spectrumDecay[i]) spectrumPeaks[i] = spectrumDecay[i];
-    spectrumPeaks[i] = spectrumPeaks[i] * (1.0 - PEAKDECAY);
+    spectrumPeaks[i] = max(spectrumPeaks[i], spectrumDecay[i]) * (1.0 - PEAKDECAY);
   }
 
   // Calculate audio levels for automatic gain
   audioAvg = (1.0 - AGCSMOOTH) * audioAvg + AGCSMOOTH * (analogsum / 7.0);
 
   // Calculate gain adjustment factor
-  gainAGC = 300.0 / audioAvg;
-  if (gainAGC > GAINUPPERLIMIT) gainAGC = GAINUPPERLIMIT;
-  if (gainAGC < GAINLOWERLIMIT) gainAGC = GAINLOWERLIMIT;
+  gainAGC = constrain(300.0 / audioAvg, GAINLOWERLIMIT, GAINUPPERLIMIT);
   // Serial.println(gainAGC);
 }
 

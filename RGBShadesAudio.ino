@@ -67,24 +67,23 @@
 
 // list of functions that will be displayed
 functionList effectListAudio[] = {
-                                  // rings,
-                                  // audioShadesOutline,
-                                  // audioStripes,
-                                  // audioCirc,
-                                  // drawVU,
-                                  drawAnalyzer
-                                 };
+  // rings,
+  // audioShadesOutline,
+  // audioStripes,
+  // audioCirc,
+  // drawVU,
+  drawAnalyzer
+};
 
 functionList effectListNoAudio[] = {
-                                    // threeSine,
-                                    // confetti,
-                                    // rider,
-                                    // glitter,
-                                    // slantBars,
-                                    // colorFill,
-                                    // sideRain
-                                   };
-
+  // threeSine,
+  // confetti,
+  // rider,
+  // glitter,
+  // slantBars,
+  // colorFill,
+  // sideRain
+};
 
 byte numEffects;
 const byte numEffectsAudio = (sizeof(effectListAudio) / sizeof(effectListAudio[0]));
