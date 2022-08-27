@@ -63,19 +63,20 @@
 #include "utils.h"
 #include "audio.h"
 #include "effects.h"
+#include "custom_effects.h"
 #include "buttons.h"
 
 // list of functions that will be displayed
-functionList effectListAudio[] = {
+functionList effectList[] = {
+  // AUDIO
   // rings,
   // audioShadesOutline,
   // audioStripes,
   // audioCirc,
   // drawVU,
   drawAnalyzer
-};
 
-functionList effectListNoAudio[] = {
+  // NO AUDIO
   // threeSine,
   // confetti,
   // rider,
@@ -83,11 +84,12 @@ functionList effectListNoAudio[] = {
   // slantBars,
   // colorFill,
   // sideRain
+
+  // CUSTOM
+  // simplifiedAnalyzer
 };
 
-byte numEffects;
-const byte numEffectsAudio = (sizeof(effectListAudio) / sizeof(effectListAudio[0]));
-const byte numEffectsNoAudio = (sizeof(effectListNoAudio) / sizeof(effectListNoAudio[0]));
+const byte numEffects = (sizeof(effectList) / sizeof(effectList[0]));
 
 
 // Runs one time at the start of the program (power up or reset)
@@ -101,15 +103,6 @@ void setup() {
     autoCycle = EEPROM.read(2);
     currentBrightness = EEPROM.read(3);
     audioEnabled = EEPROM.read(4);
-  }
-  
-  switch (audioEnabled) {
-    case true:
-      numEffects = numEffectsAudio;
-      break;
-    case false:
-      numEffects = numEffectsNoAudio;
-      break;
   }
 
   if (currentEffect > (numEffects - 1)) currentEffect = 0;
@@ -136,8 +129,7 @@ void setup() {
 }
 
 // Runs over and over until power off or reset
-void loop()
-{
+void loop() {
   currentMillis = millis(); // save the current timer value
   updateButtons();          // read, debounce, and process the buttons
   doButtons();              // perform actions based on button state
@@ -168,14 +160,7 @@ void loop()
   // run the currently selected effect every effectDelay milliseconds
   if (currentMillis - effectMillis > effectDelay) {
     effectMillis = currentMillis;
-    switch (audioEnabled) {
-      case true:
-        effectListAudio[currentEffect]();
-        break;
-      case false:
-        effectListNoAudio[currentEffect]();
-        break;
-    }
+    effectList[currentEffect]();
     //random16_add_entropy(1); // make the random values a bit more random-ish
   }
 
@@ -185,5 +170,4 @@ void loop()
   }
 
   FastLED.show(); // send the contents of the led memory to the LEDs
-
 }

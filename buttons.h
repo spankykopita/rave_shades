@@ -18,8 +18,7 @@
 unsigned long buttonEvents[NUMBUTTONS];
 byte buttonStatuses[NUMBUTTONS];
 byte buttonmap[NUMBUTTONS] = {BRIGHTNESSBUTTON, MODEBUTTON};
-extern const byte numEffectsAudio;
-extern const byte numEffectsNoAudio;
+extern const byte numEffects;
 
 
 
@@ -85,15 +84,8 @@ byte buttonStatus(byte buttonNum) {
 void doButtons() {
 
   if ((buttonStatuses[0] == BTNPRESSED) && (buttonStatuses[1] == BTNPRESSED)) {
-    audioEnabled = !audioEnabled; // toggle audio mode
-    switch (audioEnabled) {
-      case true:
-        numEffects = numEffectsAudio;
-        break;
-      case false:
-        numEffects = numEffectsNoAudio;
-        break;
-    }
+    audioEnabled = !audioEnabled; // toggle audio mode TODO remove / change button
+
     currentEffect = 0;
     effectInit = false;
     audioActive = false;

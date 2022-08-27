@@ -20,7 +20,7 @@ uint8_t fadeActive = 0;
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 
 typedef void (*functionList)(); // definition for list of effect function pointers
-extern byte numEffects;
+// extern byte numEffects;
 
 
 // Increment the global hue value for functions that use it
@@ -59,10 +59,17 @@ void scrollArray(byte scrollDir) {
       for (byte y = 0; y < kMatrixHeight; y++) {
         leds[XY(scrollX,y)] = leds[XY(scrollX + scrollDir*2 - 1,y)];
       }
-    }
-  
+    } 
 }
 
+// Mirror right side of glasses from left
+void mirrorArray() {
+  for (byte x = 0; x < kMatrixWidth / 2; x++) {
+    for (byte y = 0; y < kMatrixHeight; y++) {
+      leds[XY(kMatrixWidth - x - 1, y)] = leds[XY(x, y)];
+    }
+  }
+}
 
 // Pick a random palette from a list
 void selectRandomPalette() {
@@ -234,4 +241,3 @@ byte nextBrightness(boolean resetVal) {
 
   return brightVals[currentBrightness];
 }
-

@@ -51,7 +51,11 @@ void doAnalogs() {
     delayMicroseconds(30);
 
     // noise floor filter
-    spectrumValue[i] = max(0, spectrumValue[i] - NOISEFLOOR);
+    if (spectrumValue[i] < NOISEFLOOR) {
+      spectrumValue[i] = 0;
+    } else {
+      spectrumValue[i] -= NOISEFLOOR;
+    }
 
     // apply correction factor per frequency bin
     spectrumValue[i] = spectrumValue[i] * pgm_read_byte(spectrumFactors+i) / 10;
@@ -89,7 +93,7 @@ byte beatDetect() {
   float specCombo = (spectrumDecay[0] + spectrumDecay[1]) / 2.0;
   beatAvg = (1.0 - AGCSMOOTH) * beatAvg + AGCSMOOTH * specCombo;
   
-  if (lastBeatVal < beatAvg) lastBeatVal = beatAvg;
+  lastBeatVal = max(lastBeatVal, beatAvg);
   if ((specCombo - beatAvg) > beatLevel && beatTriggered == 0 && currentMillis - lastBeatMillis > beatDelay) {
     beatTriggered = 1;
     lastBeatVal = specCombo;
@@ -101,6 +105,4 @@ byte beatDetect() {
   } else {
     return 0;
   }
-  
 }
-
