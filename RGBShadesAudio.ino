@@ -67,22 +67,20 @@
 
 // list of functions that will be displayed
 functionList effectListAudio[] = {
-                                  noiseFlyer,
-                                  rings,
-                                  audioShadesOutline,
+                                  // rings,
+                                  // audioShadesOutline,
                                   audioStripes,
                                   audioCirc,
-                                  drawVU,
-                                  //RGBpulse,
-                                  audioPlasma,
-                                  drawAnalyzer
+                                  // drawVU,
+                                  // RGBpulse,
+                                  // audioPlasma,
+                                  // drawAnalyzer
                                  };
 
 functionList effectListNoAudio[] = {
                                     // shadesOutline,
                                     // threeSine,
                                     //drawVU,
-                                    // threeDee,
                                     // hearts,
                                     // plasma,
                                     //RGBpulse,

@@ -170,33 +170,6 @@ void colorFill() {
 
 }
 
-// Emulate 3D anaglyph glasses
-void threeDee() {
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 50;
-    fadeActive = 0;
-  }
-
-  for (byte x = 0; x < kMatrixWidth; x++) {
-    for (byte y = 0; y < kMatrixHeight; y++) {
-      if (x < 7) {
-        leds[XY(x, y)] = CRGB::Blue;
-      } else if (x > 8) {
-        leds[XY(x, y)] = CRGB::Red;
-      } else {
-        leds[XY(x, y)] = CRGB::Black;
-      }
-    }
-  }
-
-  leds[XY(6, 0)] = CRGB::Black;
-  leds[XY(9, 0)] = CRGB::Black;
-
-}
-
 // Random pixels scroll sideways, uses current hue
 #define rainDir 0
 void sideRain() {
@@ -212,7 +185,6 @@ void sideRain() {
   byte randPixel = random8(kMatrixHeight);
   for (byte y = 0; y < kMatrixHeight; y++) leds[XY((kMatrixWidth - 1) * rainDir, y)] = CRGB::Black;
   leds[XY((kMatrixWidth - 1)*rainDir, randPixel)] = CHSV(cycleHue, 255, 255);
-
 }
 
 // Pixels with random locations and random colors selected from a palette
@@ -513,13 +485,11 @@ void audioStripes() {
     if (y == 0) audioLevel /= 2;
     if (audioLevel > 239) audioLevel = 239;
 
-
-    
     for (byte x = 0; x < kMatrixWidth; x++) {
-          brightLevel = (audioLevel-(abs(7.5-x)*20)) * 3.0;
-          if (brightLevel < 0) brightLevel = 0;
-          if (brightLevel > 254) brightLevel = 254;
-          linecolor = ColorFromPalette(currentPalette, audioLevel, brightLevel);
+      brightLevel = (audioLevel-(abs(7.5-x)*20)) * 3.0;
+      if (brightLevel < 0) brightLevel = 0;
+      if (brightLevel > 254) brightLevel = 254;
+      linecolor = ColorFromPalette(currentPalette, audioLevel, brightLevel);
       leds[XY(x, 4-y)] = linecolor;
     }
   }
@@ -676,49 +646,3 @@ void rings() {
   plasVector += 256; // using an int for slower orbit (wraps at 65536)
 
 }
-
-// Noise flyer
-
-void noiseFlyer() {
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 10;
-    selectRandomNoisePalette();
-
-    audioActive = true;
-  }
-
-  static byte hueOffset = 0;
-  static byte heading = 0;
-
-  fillnoise8();
-  float kph = (spectrumDecay[0] + spectrumDecay[1] + spectrumDecay[2]) / 3.0;
-  
-  int brightness;
-
-  for (byte x = 0; x < kMatrixWidth; x++) {
-    for (byte y = 0; y < kMatrixHeight; y++) {
-      brightness = kph/4 - 72;
-      brightness += noise[x][y];
-      if (brightness > 240) brightness = 240;
-      if (brightness < 0) brightness = 0;
-      CRGB pixelColor = ColorFromPalette(currentPalette, brightness, 255);
-      leds[XY(x,y)] = pixelColor;
-    }
-  }
-  
-  //hueOffset++;
-
-  heading += random8(5) - 2;
-
-
-  
-  nx += sin8(heading) * kph / 6000 + 5;
-  ny += cos8(heading) * kph / 6000 + 5;
-
-  
-}
-
-
-

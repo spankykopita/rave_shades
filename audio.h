@@ -73,8 +73,6 @@ void doAnalogs() {
     // process peak values
     if (spectrumPeaks[i] < spectrumDecay[i]) spectrumPeaks[i] = spectrumDecay[i];
     spectrumPeaks[i] = spectrumPeaks[i] * (1.0 - PEAKDECAY);
-
-
   }
 
   // Calculate audio levels for automatic gain
