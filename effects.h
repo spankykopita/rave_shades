@@ -216,31 +216,15 @@ void drawAnalyzer() {
   const float yScale = 255.0 / kMatrixHeight;
 
   for (byte x = 0; x < kMatrixWidth / 2; x++) {
-    byte newX = x;
-    int freqVal;
-    if (x < 2) {
-      newX = 0;
-      freqVal = spectrumDecay[newX] / 2;
-    } else {
-      newX = x - 1;
-      freqVal = spectrumDecay[newX];
-    }
+    int freqVal = spectrumDecay[x];
     
     for (byte y = 0; y < kMatrixHeight; y++) {
-      if (x > 6) {
-        pixelColor = ColorFromPalette(currentPalette, 0, 0);
-      } else {
-        int senseValue = freqVal / analyzerScaleFactor - yScale * (kMatrixHeight - 1 - y);
-        int pixelBrightness = senseValue * analyzerFadeFactor;
-        if (pixelBrightness > 255) pixelBrightness = 255;
-        if (pixelBrightness < 0) pixelBrightness = 0;
+      int senseValue = freqVal / analyzerScaleFactor - yScale * (kMatrixHeight - 1 - y);
+      int pixelBrightness = constrain(senseValue * analyzerFadeFactor, 0, 255);
+      int pixelPaletteIndex = constrain(senseValue / analyzerPaletteFactor - 15, 0, 240);
 
-        int pixelPaletteIndex = senseValue / analyzerPaletteFactor - 15;
-        if (pixelPaletteIndex > 240) pixelPaletteIndex = 240;
-        if (pixelPaletteIndex < 0) pixelPaletteIndex = 0;
+      pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 
-        pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
-      }
       leds[XY(x, y)] = pixelColor;
       leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
@@ -267,13 +251,8 @@ void drawVU() {
 
   for (byte x = 0; x < kMatrixWidth / 2; x++) {
     int senseValue = specCombo / VUScaleFactor - xScale * x;
-    int pixelBrightness = senseValue * VUFadeFactor;
-    if (pixelBrightness > 255) pixelBrightness = 255;
-    if (pixelBrightness < 0) pixelBrightness = 0;
-
-    int pixelPaletteIndex = senseValue / VUPaletteFactor - 15;
-    if (pixelPaletteIndex > 240) pixelPaletteIndex = 240;
-    if (pixelPaletteIndex < 0) pixelPaletteIndex = 0;
+    int pixelBrightness = constrain(senseValue * VUFadeFactor, 0, 255);
+    int pixelPaletteIndex = constrain(senseValue / VUPaletteFactor - 15, 0, 240);
 
     pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 
@@ -313,8 +292,6 @@ void audioCirc() {
       leds[XY(x,y)] = CRGB(lowfreq, medfreq, hifreq);
     }
   }
-
-  
 }
 
 void audioStripes() {
@@ -366,8 +343,7 @@ void audioShadesOutline() {
 
   static uint8_t beatcount = 0;
 
-  int brightness = (spectrumDecay[0] + spectrumDecay[1]);
-  if (brightness > 255) brightness = 255;
+  int brightness = min(spectrumDecay[0] + spectrumDecay[1], 255);
 
   CRGB pixelColor = CHSV(cycleHue, 255, brightness);
   
@@ -375,20 +351,7 @@ void audioShadesOutline() {
     leds[OutlineMap(x+(OUTLINESIZE/4-1)*k)] += pixelColor;
   }
 
-  float xincr = (spectrumDecay[0] + spectrumDecay[1]) / 600.0;
-  if (xincr > 1.0) xincr = 1.0;
-  if (xincr < 0.1) xincr = 0.1;
-
-  if (beatDetect()) {
-    beatcount++;
-    if (beatcount >= 32 ) beatcount = 0;
-  }
-
-  if (beatcount < 16 ) {
-    x += xincr;
-  } else {
-    x -= xincr;
-  }
+  x += constrain((spectrumDecay[0] + spectrumDecay[1]) / 600.0, 0.1, 1.0);
   
   if (x > (OUTLINESIZE-1)) x = 0;
   if (x < 0) x = OUTLINESIZE - 1;
