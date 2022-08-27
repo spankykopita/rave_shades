@@ -36,38 +36,6 @@ void threeSine() {
 
 }
 
-
-// RGB Plasma
-void plasma() {
-
-  static byte offset  = 0; // counter for radial color wave motion
-  static int plasVector = 0; // counter for orbiting plasma center
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 10;
-    fadeActive = 0;
-  }
-
-  // Calculate current center of plasma pattern (can be offscreen)
-  int xOffset = cos8(plasVector / 256);
-  int yOffset = sin8(plasVector / 256);
-
-  // Draw one frame of the animation into the LED array
-  for (int x = 0; x < kMatrixWidth; x++) {
-    for (int y = 0; y < kMatrixHeight; y++) {
-      byte color = sin8(sqrt(sq(((float)x - 7.5) * 10 + xOffset - 127) + sq(((float)y - 2) * 10 + yOffset - 127)) + offset);
-      leds[XY(x, y)] = CHSV(color, 255, 255);
-    }
-  }
-
-  offset++; // wraps at 255 for sin8
-  plasVector += 16; // using an int for slower orbit (wraps at 65536)
-
-}
-
-
 // Scanning pattern left/right, uses global hue cycle
 void rider() {
 
@@ -277,8 +245,6 @@ void drawAnalyzer() {
       leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
   }
-
-
 }
 
 #define VUFadeFactor 5
@@ -318,44 +284,6 @@ void drawVU() {
   }
 }
 
-// RGB Plasma
-void audioPlasma() {
-
-  static byte offset  = 0; // counter for radial color wave motion
-  static int plasVector = 0; // counter for orbiting plasma center
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 10;
-    selectRandomAudioPalette();
-    audioActive = true;
-    fadeActive = 0;
-  }
-
-  // Calculate current center of plasma pattern (can be offscreen)
-  int xOffset = (cos8(plasVector / 256)-127)/2;
-  int yOffset = (sin8(plasVector / 256)-127)/2;
-
-  //int xOffset = 0;
-  //int yOffset = 0;
-
-
-  // Draw one frame of the animation into the LED array
-  for (int x = 0; x < kMatrixWidth; x++) {
-    for (int y = 0; y < kMatrixHeight; y++) {
-      byte color = sin8(sqrt(sq(((float)x - 7.5) * 12 + xOffset) + sq(((float)y - 2) * 12 + yOffset)) + offset);
-      leds[XY(x, y)] = ColorFromPalette(currentPalette, color, 255);
-    }
-  }
-
-  offset++; // wraps at 255 for sin8
-  plasVector += (spectrumDecay[0] + spectrumDecay[1] + spectrumDecay[2]); // using an int for slower orbit (wraps at 65536)
-
-}
-
-
-
 void audioCirc() {
   // startup tasks
   if (effectInit == false) {
@@ -389,46 +317,6 @@ void audioCirc() {
   
 }
 
-
-// RGB Plasma
-void audioSpin() {
-
-  static byte offset  = 0; // counter for radial color wave motion
-  static int plasVector = 0; // counter for orbiting plasma center
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 10;
-    selectRandomAudioPalette();
-    audioActive = true;
-    fadeActive = 0;
-  }
-
-  // Calculate current center of plasma pattern (can be offscreen)
-  int xOffset = 0;
-  int yOffset = 0;
-
-  //int xOffset = 0;
-  //int yOffset = 0;
-
-
-  // Draw one frame of the animation into the LED array
-  for (int x = 0; x < kMatrixWidth; x++) {
-    for (int y = 0; y < kMatrixHeight; y++) {
-      //byte color = sin8(sqrt(sq(((float)x - 7.5) * 12 + xOffset) + sq(((float)y - 2) * 12 + yOffset)) + offset);
-      float tanxy = ((float)(x-7.5)/(float)((y-2))*2);
-      byte color = sin8(tanxy*10+plasVector/100);
-      leds[XY(x, y)] = ColorFromPalette(currentPalette, color, 255);
-    }
-  }
-
-  offset++; // wraps at 255 for sin8
-  plasVector += (spectrumDecay[0] + spectrumDecay[1] + spectrumDecay[2]); // using an int for slower orbit (wraps at 65536)
-
-}
-
-
 void audioStripes() {
   // startup tasks
   if (effectInit == false) {
@@ -461,28 +349,7 @@ void audioStripes() {
 }
 
 
-//leds run around the periphery of the shades, changing color every go 'round
-void shadesOutline() {
-  
-  static uint8_t x = 0;
-  
-  //startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 25;
-    FastLED.clear();
-    currentPalette = RainbowColors_p;
-    fadeActive = 2;
-  }
-
-  CRGB pixelColor = CHSV(cycleHue, 255, 255);
-  leds[OutlineMap(x)] = pixelColor;
-
-  x++;
-  if (x > (OUTLINESIZE-1)) x = 0;
-  
-}
-
+//leds run around the periphery of the shades
 void audioShadesOutline() {
   
   static float x = 0;
@@ -512,9 +379,6 @@ void audioShadesOutline() {
   if (xincr > 1.0) xincr = 1.0;
   if (xincr < 0.1) xincr = 0.1;
 
-
-
-
   if (beatDetect()) {
     beatcount++;
     if (beatcount >= 32 ) beatcount = 0;
@@ -528,7 +392,6 @@ void audioShadesOutline() {
   
   if (x > (OUTLINESIZE-1)) x = 0;
   if (x < 0) x = OUTLINESIZE - 1;
-  
 }
 
 // Ring pulser

@@ -72,27 +72,17 @@ functionList effectListAudio[] = {
                                   // audioStripes,
                                   // audioCirc,
                                   // drawVU,
-                                  audioPlasma, // TODO test how audio affects velocity
                                   drawAnalyzer
                                  };
 
 functionList effectListNoAudio[] = {
-                                    // shadesOutline,
                                     // threeSine,
-                                    //drawVU,
-                                    // hearts,
-                                    // plasma,
-                                    //RGBpulse,
                                     // confetti,
-                                    //audioCirc,
                                     // rider,
-                                    glitter,
-                                    // drawAnalyzer,
+                                    // glitter,
                                     // slantBars,
-                                    // audioPlasma,
-                                    colorFill,
-                                    // audioStripes,
-                                    sideRain
+                                    // colorFill,
+                                    // sideRain
                                    };
 
 
@@ -145,8 +135,6 @@ void setup() {
   random16_add_entropy(analogRead(ANALOGPIN));
   //Serial.begin(115200);
 }
-
-
 
 // Runs over and over until power off or reset
 void loop()

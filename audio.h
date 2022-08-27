@@ -82,8 +82,7 @@ void doAnalogs() {
   gainAGC = 300.0 / audioAvg;
   if (gainAGC > GAINUPPERLIMIT) gainAGC = GAINUPPERLIMIT;
   if (gainAGC < GAINLOWERLIMIT) gainAGC = GAINLOWERLIMIT;
-  //Serial.println(gainAGC);
-
+  // Serial.println(gainAGC);
 }
 
 // Attempt at beat detection
