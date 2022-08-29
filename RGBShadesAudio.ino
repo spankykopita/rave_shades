@@ -74,7 +74,7 @@ functionList effectList[] = {
   // audioStripes,
   // audioCirc,
   // drawVU,
-  drawAnalyzer
+  // drawAnalyzer
 
   // NO AUDIO
   // threeSine,
@@ -86,7 +86,7 @@ functionList effectList[] = {
   // sideRain
 
   // CUSTOM
-  // simplifiedAnalyzer
+  customAnalyzer
 };
 
 const byte numEffects = (sizeof(effectList) / sizeof(effectList[0]));

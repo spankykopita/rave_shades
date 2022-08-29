@@ -68,7 +68,11 @@ uint8_t XY( uint8_t x, uint8_t y)
   return j;
 }
 
-
+const uint8_t SideTable[] = {
+  29, 30, 57,
+  14, 43, 44
+};
+#define SIDESIZE sizeof(SideTable)
 
 // Map LEDs to shades outline
 const uint8_t OutlineTable[] = {

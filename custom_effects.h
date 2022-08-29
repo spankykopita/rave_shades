@@ -6,7 +6,15 @@
 //    * All animation should be controlled with counters and effectDelay, no delay() or loops
 //    * Pixel data should be written using leds[XY(x,y)] to map coordinates to the RGB Shades layout
 
-void simplifiedAnalyzer() {
+void overlaySideBeat() {
+  if (beatDetect()) {
+    for (int i = 0; i < SIDESIZE; i++) {
+      leds[SideTable[i]] = ColorFromPalette(currentPalette, 200);
+    }
+  }
+}
+
+void customAnalyzer() {
   // startup tasks
   if (effectInit == false) {
     effectInit = true;
@@ -20,8 +28,8 @@ void simplifiedAnalyzer() {
 
   const float yScale = 255.0 / kMatrixHeight;
 
-  for (byte x = 0; x < 4; x++) {
-    int freqVal = spectrumDecay[x + 1];
+  for (byte x = 0; x < kMatrixWidth / 2; x++) {
+    int freqVal = spectrumDecay[x];
     
     for (byte y = 0; y < kMatrixHeight; y++) {
       int senseValue = freqVal / analyzerScaleFactor - yScale * (kMatrixHeight - 1 - y);
@@ -30,9 +38,10 @@ void simplifiedAnalyzer() {
 
       pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 
-      leds[XY(x * 2, y)] = pixelColor;
-      leds[XY(x * 2 + 1, y)] = pixelColor;
+      leds[XY(x, y)] = pixelColor;
     }
   }
   mirrorArray();
+
+  overlaySideBeat();
 }
