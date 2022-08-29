@@ -100,7 +100,7 @@ void setup() {
   byte eepromWasWritten = EEPROM.read(0);
   if (eepromWasWritten == 99) {
     currentEffect = EEPROM.read(1);
-    autoCycle = EEPROM.read(2);
+    // autoCycle = EEPROM.read(2);
     currentBrightness = EEPROM.read(3);
     audioEnabled = EEPROM.read(4);
   }
@@ -144,12 +144,20 @@ void loop() {
   }
 
   // switch to a new effect every cycleTime milliseconds
-  if (currentMillis - cycleMillis > cycleTime && autoCycle == true) {
+  if (currentMillis - cycleMillis > cycleTime) {
     cycleMillis = currentMillis;
-    if (++currentEffect >= numEffects) currentEffect = 0; // loop to start of effect list
-    effectInit = false; // trigger effect initialization when new effect is selected
-    audioActive = false;
+    // Pick a new palette target to fade towards
+    nextPalette = getRandomAudioPalette();
+    // if (autoCycle == true) {
+    //   if (++currentEffect >= numEffects) currentEffect = 0; // loop to start of effect list
+    //   effectInit = false; // trigger effect initialization when new effect is selected
+    //   audioActive = false;
+    // }
   }
+    if (currentMillis - paletteBlendMillis > 100) {
+      paletteBlendMillis = currentMillis;
+      nblendPaletteTowardPalette(currentPalette, nextPalette, 100);
+    }
 
   // increment the global hue value every hueTime milliseconds
   if (currentMillis - hueMillis > hueTime) {
@@ -161,7 +169,6 @@ void loop() {
   if (currentMillis - effectMillis > effectDelay) {
     effectMillis = currentMillis;
     effectList[currentEffect]();
-    //random16_add_entropy(1); // make the random values a bit more random-ish
   }
 
   // run a fade effect

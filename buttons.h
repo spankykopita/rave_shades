@@ -21,7 +21,6 @@ byte buttonmap[NUMBUTTONS] = {BRIGHTNESSBUTTON, MODEBUTTON};
 extern const byte numEffects;
 
 
-
 void updateButtons() {
   for (byte i = 0; i < NUMBUTTONS; i++) {
     switch (buttonStatuses[i]) {

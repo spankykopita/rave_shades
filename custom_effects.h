@@ -20,8 +20,8 @@ void simplifiedAnalyzer() {
 
   const float yScale = 255.0 / kMatrixHeight;
 
-  for (byte x = 0; x < kMatrixWidth / 2; x++) {
-    int freqVal = spectrumDecay[x];
+  for (byte x = 0; x < 4; x++) {
+    int freqVal = spectrumDecay[x + 1];
     
     for (byte y = 0; y < kMatrixHeight; y++) {
       int senseValue = freqVal / analyzerScaleFactor - yScale * (kMatrixHeight - 1 - y);
@@ -30,8 +30,9 @@ void simplifiedAnalyzer() {
 
       pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 
-      leds[XY(x, y)] = pixelColor;
-      leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
+      leds[XY(x * 2, y)] = pixelColor;
+      leds[XY(x * 2 + 1, y)] = pixelColor;
     }
   }
+  mirrorArray();
 }

@@ -9,7 +9,7 @@
 
 // Smooth/average settings
 #define SPECTRUMSMOOTH 0.1
-#define PEAKDECAY 0.05
+#define PEAKDECAY 0.95
 #define NOISEFLOOR 65
 
 // AGC settings
@@ -70,7 +70,7 @@ void doAnalogs() {
     spectrumDecay[i] = (1.0 - SPECTRUMSMOOTH) * spectrumDecay[i] + SPECTRUMSMOOTH * spectrumValue[i];
 
     // process peak values
-    spectrumPeaks[i] = max(spectrumPeaks[i], spectrumDecay[i]) * (1.0 - PEAKDECAY);
+    spectrumPeaks[i] = max(spectrumPeaks[i], spectrumDecay[i]) * PEAKDECAY;
   }
 
   // Calculate audio levels for automatic gain
