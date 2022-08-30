@@ -156,7 +156,7 @@ void loop() {
   }
     if (currentMillis - paletteBlendMillis > 100) {
       paletteBlendMillis = currentMillis;
-      nblendPaletteTowardPalette(currentPalette, nextPalette, 100);
+      nblendPaletteTowardPalette(currentPalette, nextPalette, 80);
     }
 
   // increment the global hue value every hueTime milliseconds

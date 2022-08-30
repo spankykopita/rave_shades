@@ -26,7 +26,7 @@ float gainAGC = 1.0;
 
 void doAnalogs() {
 
-  static PROGMEM const byte spectrumFactors[7] = {6, 8, 8, 8, 7, 7, 10};
+  static PROGMEM const byte spectrumFactors[7] = {8, 8, 9, 8, 7, 4, 10};
 
   // reset MSGEQ7 to first frequency bin
   digitalWrite(RESETPIN, HIGH);

@@ -29,12 +29,10 @@ void customAnalyzer() {
   const float yScale = 255.0 / kMatrixHeight;
 
   for (byte x = 0; x < kMatrixWidth / 2; x++) {
-    int freqVal = spectrumDecay[x];
-    
     for (byte y = 0; y < kMatrixHeight; y++) {
-      int senseValue = freqVal / analyzerScaleFactor - yScale * (kMatrixHeight - 1 - y);
-      int pixelBrightness = constrain(senseValue * analyzerFadeFactor, 0, 255);
+      int senseValue = spectrumDecay[x] / analyzerScaleFactor - mapToByteRange(y, kMatrixHeight - 1, 0);
       int pixelPaletteIndex = constrain(senseValue / analyzerPaletteFactor - 15, 0, 240);
+      int pixelBrightness = constrain(senseValue * analyzerFadeFactor, 0, 255);
 
       pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 

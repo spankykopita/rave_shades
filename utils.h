@@ -233,3 +233,7 @@ byte nextBrightness(boolean resetVal) {
 
   return brightVals[currentBrightness];
 }
+
+long mapToByteRange(long value, long fromLow, long fromHigh) {
+  return map(value, fromLow, fromHigh, 0, 255);
+}
