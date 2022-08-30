@@ -1,4 +1,10 @@
 // Assorted useful functions and variables
+// TODO move to types file
+class AudioSample {
+  public:
+    unsigned long millis;
+    byte spectrumValue;
+};
 
 // Global variables
 boolean effectInit = false; // indicates if a pattern has been recently switched
@@ -17,6 +23,13 @@ byte currentBrightness = STARTBRIGHTNESS; // 0-255 will be scaled to 0-MAXBRIGHT
 boolean audioEnabled = true; // flag for running audio patterns
 boolean audioActive = false;
 uint8_t fadeActive = 0;
+
+const uint16_t SAMPLE_WINDOW_MILLIS = 2500;
+const byte GAP_BETWEEN_SAMPLES_MILLIS = 20;
+const uint16_t MAX_NUMBER_OF_SAMPLES = SAMPLE_WINDOW_MILLIS / GAP_BETWEEN_SAMPLES_MILLIS;
+
+unsigned int maxSample;
+Array<AudioSample, MAX_NUMBER_OF_SAMPLES> rollingSamples; // Audio samples for beat detection
 
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 CRGBPalette16 nextPalette(RainbowColors_p); // global palette storage
@@ -236,4 +249,75 @@ byte nextBrightness(boolean resetVal) {
 
 long mapToByteRange(long value, long fromLow, long fromHigh) {
   return map(value, fromLow, fromHigh, 0, 255);
+}
+
+long mapFromPercentile(long percentile, long toLow, long toHigh) {
+  return map(percentile, 0, 100, toLow, toHigh);
+}
+
+// Print given array.
+void printArray(uint16_t* array, uint16_t arraySize) {
+  for (uint16_t i = 0; i < arraySize; i++) {
+    Serial.print(array[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
+
+void printArray(byte* array, uint16_t arraySize) {
+  for (uint16_t i = 0; i < arraySize; i++) {
+    Serial.print(array[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
+
+void printArray(float* array, uint16_t arraySize) {
+  for (uint16_t i = 0; i < arraySize; i++) {
+    Serial.print(array[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
+
+void printArray(Array<unsigned long, 125UL> array) {
+  for (uint16_t i = 0; i < array.size(); i++) {
+    Serial.print(array[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
+
+void printArray(Vector<unsigned long> array) {
+  for (uint16_t i = 0; i < array.size(); i++) {
+    Serial.print(array[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
+
+void printArray(CircularBuffer<uint16_t, 20UL, uint8_t> array) {
+  for (uint16_t i = 0; i < array.size(); i++) {
+    Serial.print(array[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
+
+void printSampleValues() {
+  Serial.print("Sample values: ");
+  for (uint16_t i = 0; i < rollingSamples.size(); i++) {
+    Serial.print(rollingSamples[i].spectrumValue);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
+
+void printSampleTimes() {
+  Serial.print("Sample times: ");
+  for (uint16_t i = 0; i < rollingSamples.size(); i++) {
+    Serial.print(rollingSamples[i].millis);
+    Serial.print(' ');
+  }
+  Serial.println();
 }

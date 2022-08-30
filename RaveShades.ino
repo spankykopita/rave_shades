@@ -59,6 +59,10 @@
 #include <FastLED.h>
 #include <EEPROM.h>
 #include <Arduino.h>
+#include <Array.h>
+#include <Vector.h>
+#include <CircularBuffer.h>
+#include <AceSorting.h>
 #include "XYmap.h"
 #include "utils.h"
 #include "audio.h"
@@ -125,7 +129,7 @@ void setup() {
   digitalWrite(STROBEPIN, HIGH);
 
   random16_add_entropy(analogRead(ANALOGPIN));
-  //Serial.begin(115200);
+  Serial.begin(115200);
 }
 
 // Runs over and over until power off or reset

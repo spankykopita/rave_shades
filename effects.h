@@ -81,7 +81,6 @@ void glitter() {
       leds[XY(x, y)] = CHSV(cycleHue, 255, random8(5) * 63);
     }
   }
-
 }
 
 

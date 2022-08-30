@@ -7,11 +7,11 @@
 //    * Pixel data should be written using leds[XY(x,y)] to map coordinates to the RGB Shades layout
 
 void overlaySideBeat() {
-  if (beatDetect()) {
-    for (int i = 0; i < SIDESIZE; i++) {
-      leds[SideTable[i]] = ColorFromPalette(currentPalette, 200);
-    }
-  }
+  // if (isBeat) {
+  //   for (int i = 0; i < SIDESIZE; i++) {
+  //     leds[SideTable[i]] = ColorFromPalette(currentPalette, 200);
+  //   }
+  // }
 }
 
 void customAnalyzer() {
