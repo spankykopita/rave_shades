@@ -176,7 +176,7 @@ uint16_t getMostCommonGap() {
     sorted_gaps[i] = adjustedGapHistogram[i];
   }
   ace_sorting::shellSortKnuth(sorted_gaps, adjustedGapHistogram.size());
-  Serial.print("Sorted adjusted gaps: ");
+  Serial.print("Sorted adjusted gaps histo: ");
   printArray(sorted_gaps, adjustedGapHistogram.size());
 
   int mostCommonItem;
@@ -197,6 +197,12 @@ uint16_t getMostCommonGap() {
 
     lastValue = sorted_gaps[i];
   }
+
+  if (countOfMostCommonItem < 4) {
+    Serial.println("No confidence in BPM");
+    return 0;
+  }
+
   Serial.print("Most common millis gap: ");
   Serial.println(mostCommonItem);
   // Serial.println(countOfMostCommonItem);
@@ -211,16 +217,17 @@ void analyzeSamples() {
   // printSampleTimes();
 
   byte peakThreshold = selectPeakThreshold();
-  // Serial.println(peakThreshold);
-  if (peakThreshold < 50) {
-    // TODO more graceful short circuiting - continue BPM predictions?
+  Serial.print("Peak threshold: ");
+  Serial.println(peakThreshold);
+  if (peakThreshold < 5) {
+    // No confidence in BPM;
+    millisPerBeat = 0;
     return;
   }
 
   Vector<unsigned long> peakTimes = findPeaks(peakThreshold);
   // printArray(peakTimes);
 
-  // TODO experiment with getting a bunch of values into a histogram
   byte peakGapsSize = peakTimes.size() - 1;
   unsigned int peakGaps[peakGapsSize];
   for (int i = 0; i < peakGapsSize; i++) {
@@ -230,19 +237,56 @@ void analyzeSamples() {
   printArray(peakGaps, peakGapsSize);
   
   fixupPeakGaps(peakGaps, peakGapsSize);
+
   Serial.print("Adjusted gaps: ");
   printArray(peakGaps, peakGapsSize);
 
-  Serial.print("Adjust gap histo: ");
-  for (uint16_t i = 0; i < adjustedGapHistogram.size(); i++) {
-    Serial.print(adjustedGapHistogram[i]);
-    Serial.print(' ');
-  }
-  Serial.println();
+  // Serial.print("Adjust gap histo: ");
+  // for (uint16_t i = 0; i < adjustedGapHistogram.size(); i++) {
+  //   Serial.print(adjustedGapHistogram[i]);
+  //   Serial.print(' ');
+  // }
+  // Serial.println();
 
-  uint16_t mostCommonGap = getMostCommonGap();
+  // Update global beat tracking with either the high confident beat gap or
+  // 0 to indicate we don't have confidence
+  millisPerBeat = getMostCommonGap();
+
+  if (millisPerBeat == 0) {
+    // No confidence in BPM
+    return;
+  }
+
   Serial.print("BPM: ");
-  Serial.println(millisPerBeatToBPM(mostCommonGap));
+  Serial.println(millisPerBeatToBPM(millisPerBeat));
+
+  // Find the latest peak gap that matches the beat we calculated and set it, if any
+  // (possibly is from a past analysis but still in the histo)
+  for (int i = 0; i < peakGapsSize; i++) {
+    if (peakGaps[i] == millisPerBeat) {
+      lastConfidentBeatTimeMillis = peakTimes[i + 1];
+      Serial.print("Found confident beat time: ");
+      Serial.println(lastConfidentBeatTimeMillis);
+    }
+  }
+}
+
+boolean hasPredictedBeat() {
+  return millisPerBeat != 0 && lastConfidentBeatTimeMillis != 0;
+}
+
+unsigned long lastPredictedBeatMillis() {
+  // Int division will round down to the number of beats we've passed without confidence
+  uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
+  // Scale back up to get the actual time of the last beat
+  return beatsFromPredictionToLast * millisPerBeat + lastConfidentBeatTimeMillis;
+}
+
+unsigned long nextPredictedBeatMillis() {
+  // Int division will round down to the number of beats we've passed without confidence
+  uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
+  // Scale back up to get the actual time of the last beat
+  return (beatsFromPredictionToLast + 1) * millisPerBeat + lastConfidentBeatTimeMillis;
 }
 
 void doAnalogs() {
@@ -312,29 +356,3 @@ void doAnalogs() {
     rollingSamples.clear();
   }
 }
-
-// Attempt at beat detection
-// byte beatTriggered = 0;
-// #define beatLevel 25.0
-// #define beatDeadzone 35.0
-// #define beatDelay 50
-// float lastBeatVal = 0;
-// byte beatDetect() {
-//   static float beatAvg = 0;
-//   static unsigned long lastBeatMillis;
-//   float specCombo = (spectrumDecay[0] + spectrumDecay[1]) / 2.0;
-//   beatAvg = (1.0 - AGCSMOOTH) * beatAvg + AGCSMOOTH * specCombo;
-  
-//   lastBeatVal = max(lastBeatVal, beatAvg);
-//   if ((specCombo - beatAvg) > beatLevel && beatTriggered == 0 && currentMillis - lastBeatMillis > beatDelay) {
-//     beatTriggered = 1;
-//     lastBeatVal = specCombo;
-//     lastBeatMillis = currentMillis;
-//     return 1;
-//   } else if ((lastBeatVal - specCombo) > beatDeadzone) {
-//     beatTriggered = 0;
-//     return 0;
-//   } else {
-//     return 0;
-//   }
-// }

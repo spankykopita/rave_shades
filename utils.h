@@ -31,6 +31,10 @@ const uint16_t MAX_NUMBER_OF_SAMPLES = SAMPLE_WINDOW_MILLIS / GAP_BETWEEN_SAMPLE
 unsigned int maxSample;
 Array<AudioSample, MAX_NUMBER_OF_SAMPLES> rollingSamples; // Audio samples for beat detection
 
+uint16_t millisPerBeat = 0;
+unsigned long lastConfidentBeatTimeMillis = 0;
+unsigned long nextBeatTimeMillis;
+
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 CRGBPalette16 nextPalette(RainbowColors_p); // global palette storage
 

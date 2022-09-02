@@ -14,6 +14,19 @@ void overlaySideBeat() {
   // }
 }
 
+void overlayTopLineBeatPrediction() {
+  if (hasPredictedBeat()) {
+    // Serial.print("Predictions: ");
+    // Serial.print(lastPredictedBeatMillis());
+    // Serial.print(' ');
+    // Serial.print(currentMillis);
+    // Serial.print(' ');
+    // Serial.println(nextPredictedBeatMillis());
+    byte activeLED = map(currentMillis, lastPredictedBeatMillis(), nextPredictedBeatMillis(), 0, 14);
+    leds[activeLED] = ColorFromPalette(currentPalette, 150, 150);
+  }
+}
+
 void customAnalyzer() {
   // startup tasks
   if (effectInit == false) {
@@ -42,4 +55,5 @@ void customAnalyzer() {
   mirrorArray();
 
   overlaySideBeat();
+  overlayTopLineBeatPrediction();
 }
