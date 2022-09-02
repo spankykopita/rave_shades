@@ -33,7 +33,6 @@ Array<AudioSample, MAX_NUMBER_OF_SAMPLES> rollingSamples; // Audio samples for b
 
 uint16_t millisPerBeat = 0;
 unsigned long lastConfidentBeatTimeMillis = 0;
-unsigned long nextBeatTimeMillis;
 
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 CRGBPalette16 nextPalette(RainbowColors_p); // global palette storage
@@ -253,6 +252,10 @@ byte nextBrightness(boolean resetVal) {
 
 long mapToByteRange(long value, long fromLow, long fromHigh) {
   return map(value, fromLow, fromHigh, 0, 255);
+}
+
+long mapFromByteRange(long value, long toLow, long toHigh) {
+  return map(value, 0, 255, toLow, toHigh);
 }
 
 long mapFromPercentile(long percentile, long toLow, long toHigh) {

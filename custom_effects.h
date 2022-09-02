@@ -14,15 +14,20 @@ void overlaySideBeat() {
   // }
 }
 
+unsigned long travelSwitchMillis;
 void overlayTopLineBeatPrediction() {
   if (hasPredictedBeat()) {
     // Serial.print("Predictions: ");
-    // Serial.print(lastPredictedBeatMillis());
+    // Serial.print(lastPredictedBeatMillis);
     // Serial.print(' ');
     // Serial.print(currentMillis);
     // Serial.print(' ');
-    // Serial.println(nextPredictedBeatMillis());
-    byte activeLED = map(currentMillis, lastPredictedBeatMillis(), nextPredictedBeatMillis(), 0, 14);
+    // Serial.println(nextPredictedBeatMillis);
+    boolean travelRight = beatCounter % 2 == 0;
+    byte easedTimeBetweenBeats = ease8InOutQuad(mapToByteRange(currentMillis, lastPredictedBeatMillis, nextPredictedBeatMillis));
+    byte activeLED = travelRight ?
+      mapFromByteRange(easedTimeBetweenBeats, 0, 13) :
+      mapFromByteRange(easedTimeBetweenBeats, 13, 0);
     leds[activeLED] = ColorFromPalette(currentPalette, 150, 150);
   }
 }
@@ -50,9 +55,9 @@ void customAnalyzer() {
       pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 
       leds[XY(x, y)] = pixelColor;
+      leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
   }
-  mirrorArray();
 
   overlaySideBeat();
   overlayTopLineBeatPrediction();

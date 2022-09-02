@@ -65,7 +65,7 @@ uint16_t millisPerBeatToBPM(uint16_t millisPerBeat) {
 }
 
 const byte MIN_BPM = 60;
-const byte MAX_BPM = 130;
+const byte MAX_BPM = 157;
 const uint16_t MIN_MILLIS_PER_BEAT = bpmToMillisPerBeat(MAX_BPM);
 const uint16_t MAX_MILLIS_PER_BEAT = bpmToMillisPerBeat(MIN_BPM);
 
@@ -213,7 +213,7 @@ uint16_t getMostCommonGap() {
 void analyzeSamples() {
   Serial.println("ANALYZING SAMPLES");
 
-  printSampleValues();
+  // printSampleValues();
   // printSampleTimes();
 
   byte peakThreshold = selectPeakThreshold();
@@ -275,22 +275,33 @@ boolean hasPredictedBeat() {
   return millisPerBeat != 0 && lastConfidentBeatTimeMillis != 0;
 }
 
-unsigned long lastPredictedBeatMillis() {
+unsigned long getLastPredictedBeatMillis() {
   // Int division will round down to the number of beats we've passed without confidence
   uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
   // Scale back up to get the actual time of the last beat
   return beatsFromPredictionToLast * millisPerBeat + lastConfidentBeatTimeMillis;
 }
 
-unsigned long nextPredictedBeatMillis() {
+unsigned long getNextPredictedBeatMillis() {
   // Int division will round down to the number of beats we've passed without confidence
   uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
   // Scale back up to get the actual time of the last beat
   return (beatsFromPredictionToLast + 1) * millisPerBeat + lastConfidentBeatTimeMillis;
 }
 
+byte beatCounter = 0;
+unsigned long lastPredictedBeatMillis;
+unsigned long nextPredictedBeatMillis;
+void updateBeats() {
+  if (hasPredictedBeat() && nextPredictedBeatMillis < currentMillis) {
+    lastPredictedBeatMillis = nextPredictedBeatMillis;
+    nextPredictedBeatMillis = getNextPredictedBeatMillis();
+    beatCounter++;
+  }
+}
+
 void doAnalogs() {
-  static PROGMEM const byte spectrumFactors[7] = {8, 8, 9, 8, 7, 4, 10};
+  static PROGMEM const byte spectrumFactors[7] = {8, 8, 9, 8, 7, 3, 10};
 
   // reset MSGEQ7 to first frequency bin
   digitalWrite(RESETPIN, HIGH);
@@ -355,4 +366,6 @@ void doAnalogs() {
     analyzeSamples();
     rollingSamples.clear();
   }
+
+  updateBeats();
 }

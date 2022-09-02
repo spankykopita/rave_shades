@@ -224,9 +224,9 @@ void drawAnalyzer() {
       pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 
       leds[XY(x, y)] = pixelColor;
+      leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
   }
-  mirrorArray();
 }
 
 #define VUFadeFactor 5
