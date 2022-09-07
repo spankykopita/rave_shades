@@ -15,7 +15,7 @@
 #define BTNDEBOUNCETIME 30
 #define BTNLONGPRESSTIME 1500
 
-unsigned long buttonEvents[NUMBUTTONS];
+uint32_t buttonEvents[NUMBUTTONS];
 byte buttonStatuses[NUMBUTTONS];
 byte buttonmap[NUMBUTTONS] = {BRIGHTNESSBUTTON, MODEBUTTON};
 extern const byte numEffects;

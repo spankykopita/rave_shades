@@ -27,14 +27,14 @@ float gainAGC = 1.0;
 
 // Beat tracking
 byte beatCounter = 0;
-unsigned long lastPredictedBeatMillis;
-unsigned long nextPredictedBeatMillis;
+uint32_t lastPredictedBeatMillis;
+uint32_t nextPredictedBeatMillis;
 
 uint16_t millisPerBeat = 0;
-unsigned long lastConfidentBeatTimeMillis = 0;
+uint32_t lastConfidentBeatTimeMillis = 0;
 
 // Peak tracking
-unsigned long lastLocalBassPeakMillis = 0;
+uint32_t lastLocalBassPeakMillis = 0;
 unsigned int lastBassValue = 0;
 boolean isLocalBassPeak = false;
 
@@ -89,14 +89,14 @@ boolean hasPredictedBeat() {
   return millisPerBeat != 0 && lastConfidentBeatTimeMillis != 0;
 }
 
-unsigned long getLastPredictedBeatMillis() {
+uint32_t getLastPredictedBeatMillis() {
   // Int division will round down to the number of beats we've passed without confidence
   uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
   // Scale back up to get the actual time of the last beat
   return beatsFromPredictionToLast * millisPerBeat + lastConfidentBeatTimeMillis;
 }
 
-unsigned long getNextPredictedBeatMillis() {
+uint32_t getNextPredictedBeatMillis() {
   // Int division will round down to the number of beats we've passed without confidence
   uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
   // Scale back up to get the actual time of the last beat

@@ -2,13 +2,13 @@
 // Global variables
 boolean effectInit = false; // indicates if a pattern has been recently switched
 uint16_t effectDelay = 0; // time between automatic effect changes
-unsigned long effectMillis = 0; // store the time of last effect function run
-unsigned long cycleMillis = 0; // store the time of last effect change
-unsigned long paletteBlendMillis = 0; // store the time of last palette blend
-unsigned long currentMillis; // store current loop's millis value
-unsigned long hueMillis; // store time of last hue change
-unsigned long eepromMillis; // store time of last setting change
-unsigned long audioMillis; // store time of last audio update
+uint32_t effectMillis = 0; // store the time of last effect function run
+uint32_t cycleMillis = 0; // store the time of last effect change
+uint32_t paletteBlendMillis = 0; // store the time of last palette blend
+uint32_t currentMillis; // store current loop's millis value
+uint32_t hueMillis; // store time of last hue change
+uint32_t eepromMillis; // store time of last setting change
+uint32_t audioMillis; // store time of last audio update
 byte currentEffect = 0; // index to the currently running effect
 boolean autoCycle = false; // flag for automatic effect changes
 boolean eepromOutdated = false; // flag for when EEPROM may need to be updated
@@ -18,7 +18,7 @@ boolean audioActive = false;
 uint8_t fadeActive = 0;
 
 unsigned int maxSample;
-CircularBuffer<unsigned long, 20> rollingPeaks;
+CircularBuffer<uint32_t, 20> rollingPeaks;
 
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 CRGBPalette16 nextPalette(RainbowColors_p); // global palette storage
@@ -273,7 +273,7 @@ void printArray(float* array, uint16_t arraySize) {
   Serial.println();
 }
 
-void printArray(std::vector<unsigned long> array) {
+void printArray(std::vector<uint32_t> array) {
   for (uint16_t i = 0; i < array.size(); i++) {
     Serial.print(array[i]);
     Serial.print(' ');

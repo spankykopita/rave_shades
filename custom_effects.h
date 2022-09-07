@@ -14,7 +14,7 @@ void overlaySideBeat() {
   }
 }
 
-unsigned long travelSwitchMillis;
+uint32_t travelSwitchMillis;
 void overlayTopLineBeatPrediction() {
   if (hasPredictedBeat()) {
     // Serial.print("Predictions: ");
