@@ -22,12 +22,21 @@ unsigned int spectrumValue[7];  // holds raw adc values
 float spectrumDecay[7] = {0};   // holds time-averaged values
 float spectrumPeaks[7] = {0};   // holds peak values
 
-unsigned long lastLocalBassPeakMillis = 0;
-unsigned int lastBassValue = 0;
-unsigned long lastSampleTime = 0;
-boolean isLocalBassPeak = false;
 float audioAvg = 300.0;
 float gainAGC = 1.0;
+
+// Beat tracking
+byte beatCounter = 0;
+unsigned long lastPredictedBeatMillis;
+unsigned long nextPredictedBeatMillis;
+
+uint16_t millisPerBeat = 0;
+unsigned long lastConfidentBeatTimeMillis = 0;
+
+// Peak tracking
+unsigned long lastLocalBassPeakMillis = 0;
+unsigned int lastBassValue = 0;
+boolean isLocalBassPeak = false;
 
 float averageOfCurrentPeaks() {
   unsigned int spectrumSum = 0;
@@ -74,13 +83,24 @@ const byte MAX_BPM = 125;
 const uint16_t MIN_MILLIS_PER_BEAT = bpmToMillisPerBeat(MAX_BPM);
 const uint16_t MAX_MILLIS_PER_BEAT = bpmToMillisPerBeat(MIN_BPM);
 
-long lastSampleMillis = 0;
 long lastSampleAnalysis = 0;
 
-void recordSample() {
-  if (isLocalBassPeak) {
-    rollingPeaks.push(currentMillis);
-  }
+boolean hasPredictedBeat() {
+  return millisPerBeat != 0 && lastConfidentBeatTimeMillis != 0;
+}
+
+unsigned long getLastPredictedBeatMillis() {
+  // Int division will round down to the number of beats we've passed without confidence
+  uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
+  // Scale back up to get the actual time of the last beat
+  return beatsFromPredictionToLast * millisPerBeat + lastConfidentBeatTimeMillis;
+}
+
+unsigned long getNextPredictedBeatMillis() {
+  // Int division will round down to the number of beats we've passed without confidence
+  uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
+  // Scale back up to get the actual time of the last beat
+  return (beatsFromPredictionToLast + 1) * millisPerBeat + lastConfidentBeatTimeMillis;
 }
 
 const uint8_t PEAK_ROUNDING = 15;
@@ -174,33 +194,16 @@ void analyzeSamples() {
   for (int i = 0; i < peakGapsSize; i++) {
     if (peakGaps[i] == millisPerBeat) {
       lastConfidentBeatTimeMillis = rollingPeaks[i + 1];
+      // Attempt to stop jumping of beat visuals
+      // if (getNextPredictedBeatMillis() - lastPredictedBeatMillis < 100) {
+      //   beatCounter--;
+      // }
       Serial.print("Found confident beat time: ");
       Serial.println(lastConfidentBeatTimeMillis);
     }
   }
 }
 
-boolean hasPredictedBeat() {
-  return millisPerBeat != 0 && lastConfidentBeatTimeMillis != 0;
-}
-
-unsigned long getLastPredictedBeatMillis() {
-  // Int division will round down to the number of beats we've passed without confidence
-  uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
-  // Scale back up to get the actual time of the last beat
-  return beatsFromPredictionToLast * millisPerBeat + lastConfidentBeatTimeMillis;
-}
-
-unsigned long getNextPredictedBeatMillis() {
-  // Int division will round down to the number of beats we've passed without confidence
-  uint16_t beatsFromPredictionToLast = (currentMillis - lastConfidentBeatTimeMillis) / millisPerBeat;
-  // Scale back up to get the actual time of the last beat
-  return (beatsFromPredictionToLast + 1) * millisPerBeat + lastConfidentBeatTimeMillis;
-}
-
-byte beatCounter = 0;
-unsigned long lastPredictedBeatMillis;
-unsigned long nextPredictedBeatMillis;
 void updateBeats() {
   if (hasPredictedBeat() && nextPredictedBeatMillis < currentMillis) {
     lastPredictedBeatMillis = nextPredictedBeatMillis;
@@ -259,6 +262,8 @@ void doAnalogs() {
   if (lastBassValue > spectrumValue[1] && spectrumValue[1] > spectrumPeaks[1] * 1.50f && currentMillis > lastLocalBassPeakMillis + MIN_MILLIS_PER_BEAT / 4) {
     isLocalBassPeak = true;
     lastLocalBassPeakMillis = currentMillis;
+    // Record the time of any peaks for BPM calculations
+    rollingPeaks.push(currentMillis);
   } else {
     isLocalBassPeak = false;
   }
@@ -271,14 +276,8 @@ void doAnalogs() {
   gainAGC = constrain(300.0 / audioAvg, GAINLOWERLIMIT, GAINUPPERLIMIT);
   // Serial.println(gainAGC);
 
-  // Record a new sample every 10 milliseconds
-  if (currentMillis - lastSampleMillis > GAP_BETWEEN_SAMPLES_MILLIS) {
-    lastSampleMillis = currentMillis;
-    recordSample();
-  }
-
   // Analyze samples to determine BPM every ~3 seconds
-  if (currentMillis - lastSampleAnalysis > SAMPLE_WINDOW_MILLIS) {
+  if (currentMillis - lastSampleAnalysis > 2500) {
     lastSampleAnalysis = currentMillis;
     analyzeSamples();
   }

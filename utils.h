@@ -17,15 +17,8 @@ boolean audioEnabled = true; // flag for running audio patterns
 boolean audioActive = false;
 uint8_t fadeActive = 0;
 
-const uint16_t SAMPLE_WINDOW_MILLIS = 2500;
-const byte GAP_BETWEEN_SAMPLES_MILLIS = 20;
-const uint16_t MAX_NUMBER_OF_SAMPLES = SAMPLE_WINDOW_MILLIS / GAP_BETWEEN_SAMPLES_MILLIS;
-
 unsigned int maxSample;
 CircularBuffer<unsigned long, 20> rollingPeaks;
-
-uint16_t millisPerBeat = 0;
-unsigned long lastConfidentBeatTimeMillis = 0;
 
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 CRGBPalette16 nextPalette(RainbowColors_p); // global palette storage
