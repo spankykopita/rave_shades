@@ -91,8 +91,8 @@ functionList effectList[] = {
   // sideRain
 
   // CUSTOM
-  // customAnalyzer
-  pulseSpiral
+  customAnalyzer
+  // pulseSpiral
 };
 
 const byte numEffects = (sizeof(effectList) / sizeof(effectList[0]));

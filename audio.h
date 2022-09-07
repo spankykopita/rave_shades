@@ -130,18 +130,19 @@ byte selectPeakThreshold() {
 
 // Return the times of sample data that was over the threshold
 Vector<unsigned long> findPeaks(byte peakThreshold) {
-  byte lastSampleValue = 0;
   // This is kinda dangerous because we don't know how many peaks we'll find. C sucks.
   unsigned long peakTimesStorage[MAX_NUMBER_OF_SAMPLES / 10];
   Vector<unsigned long> peakTimes(peakTimesStorage);
 
-  for (int i = 0; i < rollingSamples.size(); i++) {
+  for (int i = 1; i < rollingSamples.size(); i++) {
+    AudioSample lastSample = rollingSamples[i - 1];
     AudioSample sample = rollingSamples[i];
     // If the last value was below threshold and this is above threshold, count as a peak
-    if (lastSampleValue < peakThreshold && sample.spectrumValue >= peakThreshold) {
+    if (lastSample.spectrumValue < peakThreshold
+      && sample.spectrumValue >= peakThreshold
+      && lastSample.millis < sample.millis) {
       peakTimes.push_back(sample.millis);
     }
-    lastSampleValue = sample.spectrumValue;
   }
 
   return peakTimes;
@@ -152,7 +153,6 @@ void fixupPeakGaps(unsigned int* peakGaps, byte size) {
   // Adjust gaps to fit into expected BPM range
   for (int i = 0; i < size; i++) {
     while (!(MIN_MILLIS_PER_BEAT < peakGaps[i] && peakGaps[i] < MAX_MILLIS_PER_BEAT)) {
-      Serial.println(peakGaps[i]);
       if (peakGaps[i] < MIN_MILLIS_PER_BEAT) {
         peakGaps[i] *= 2;
       } else {
@@ -216,6 +216,10 @@ void analyzeSamples() {
 
   // printSampleValues();
   // printSampleTimes();
+
+  if (rollingSamples.size() < 10) {
+    return;
+  }
 
   byte peakThreshold = selectPeakThreshold();
   Serial.print("Peak threshold: ");
