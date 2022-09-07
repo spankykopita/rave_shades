@@ -63,6 +63,7 @@
 #include <Vector.h>
 #include <CircularBuffer.h>
 #include <AceSorting.h>
+#include <math.h>
 #include "XYmap.h"
 #include "utils.h"
 #include "audio.h"
@@ -90,7 +91,8 @@ functionList effectList[] = {
   // sideRain
 
   // CUSTOM
-  customAnalyzer
+  // customAnalyzer
+  pulseSpiral
 };
 
 const byte numEffects = (sizeof(effectList) / sizeof(effectList[0]));
@@ -158,10 +160,11 @@ void loop() {
     //   audioActive = false;
     // }
   }
-    if (currentMillis - paletteBlendMillis > 100) {
-      paletteBlendMillis = currentMillis;
-      nblendPaletteTowardPalette(currentPalette, nextPalette, 80);
-    }
+  
+  if (currentMillis - paletteBlendMillis > 100) {
+    paletteBlendMillis = currentMillis;
+    nblendPaletteTowardPalette(currentPalette, nextPalette, 80);
+  }
 
   // increment the global hue value every hueTime milliseconds
   if (currentMillis - hueMillis > hueTime) {

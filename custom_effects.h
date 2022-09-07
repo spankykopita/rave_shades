@@ -62,3 +62,35 @@ void customAnalyzer() {
   overlaySideBeat();
   overlayTopLineBeatPrediction();
 }
+
+void pulseSpiral() {
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 10;
+    selectRandomAudioPalette();
+    audioActive = true;
+    fadeActive = 0;
+  }
+
+  CRGB pixelColor;
+
+  const float yScale = 255.0 / kMatrixHeight;
+
+  for (byte x = 0; x < kMatrixWidth / 2; x++) {
+    for (byte y = 0; y < kMatrixHeight; y++) {
+      int adjustedX = x - 3;
+      int adjustedY = y - 2;
+      // From -PI to PI
+      float theta = atan2f(adjustedX, adjustedY);
+      float distance = sqrt(adjustedX * adjustedX + adjustedY * adjustedY);
+
+      uint8_t pixelPaletteIndex = mapToByteRange((theta + distance) * 100, (-PI + 0) * 100, (PI + 5) * 100);
+
+      pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, 150);
+
+      leds[XY(x, y)] = pixelColor;
+      leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
+    }
+  }
+}
