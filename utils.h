@@ -1,11 +1,4 @@
 // Assorted useful functions and variables
-// TODO move to types file
-class AudioSample {
-  public:
-    unsigned long millis;
-    uint8_t spectrumValue;
-};
-
 // Global variables
 boolean effectInit = false; // indicates if a pattern has been recently switched
 uint16_t effectDelay = 0; // time between automatic effect changes
@@ -29,7 +22,7 @@ const byte GAP_BETWEEN_SAMPLES_MILLIS = 20;
 const uint16_t MAX_NUMBER_OF_SAMPLES = SAMPLE_WINDOW_MILLIS / GAP_BETWEEN_SAMPLES_MILLIS;
 
 unsigned int maxSample;
-std::vector<AudioSample> rollingSamples; // Audio samples for beat detection
+CircularBuffer<unsigned long, 20> rollingPeaks;
 
 uint16_t millisPerBeat = 0;
 unsigned long lastConfidentBeatTimeMillis = 0;
@@ -303,19 +296,10 @@ void printArray(CircularBuffer<uint16_t, 20UL, uint8_t> array) {
   Serial.println();
 }
 
-void printSampleValues() {
-  Serial.print("Sample values: ");
-  for (uint16_t i = 0; i < rollingSamples.size(); i++) {
-    Serial.print(rollingSamples[i].spectrumValue);
-    Serial.print(' ');
-  }
-  Serial.println();
-}
-
 void printSampleTimes() {
   Serial.print("Sample times: ");
-  for (uint16_t i = 0; i < rollingSamples.size(); i++) {
-    Serial.print(rollingSamples[i].millis);
+  for (uint16_t i = 0; i < rollingPeaks.size(); i++) {
+    Serial.print(rollingPeaks[i]);
     Serial.print(' ');
   }
   Serial.println();

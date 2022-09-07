@@ -9,7 +9,7 @@
 
 // Smooth/average settings
 #define SPECTRUMSMOOTH 0.1
-#define PEAKDECAY 0.95
+#define PEAKDECAY 0.95f
 #define NOISEFLOOR 65
 
 // AGC settings
@@ -21,6 +21,11 @@
 unsigned int spectrumValue[7];  // holds raw adc values
 float spectrumDecay[7] = {0};   // holds time-averaged values
 float spectrumPeaks[7] = {0};   // holds peak values
+
+unsigned long lastLocalBassPeakMillis = 0;
+unsigned int lastBassValue = 0;
+unsigned long lastSampleTime = 0;
+boolean isLocalBassPeak = false;
 float audioAvg = 300.0;
 float gainAGC = 1.0;
 
@@ -72,84 +77,13 @@ const uint16_t MAX_MILLIS_PER_BEAT = bpmToMillisPerBeat(MIN_BPM);
 long lastSampleMillis = 0;
 long lastSampleAnalysis = 0;
 
-float maxOfCurrentSamples() {
-  byte maxValue = 0;
-  for (uint16_t i = 0; i < rollingSamples.size(); i++) {
-    maxValue = std::max(rollingSamples[i].spectrumValue, maxValue);
-  }
-  return maxValue;
-}
-
 void recordSample() {
-  unsigned int value = spectrumValue[1];
-  if (value > maxSample) {
-    maxSample = value;
+  if (isLocalBassPeak) {
+    rollingPeaks.push(currentMillis);
   }
-  // For lack of a better approach - samples take up a lot of memory but we only need the 
-  // values relative to each other. Since I don't know what the max possible value to get
-  // from the mic is, just record what the largest sample is. Hopefully this stabilizes
-  // quickly and isn't outrageously huge, or else the relative gap between values will be lost.
-  uint8_t valueToRecord = mapToByteRange(value, 0, maxSample);
-  if (valueToRecord < 5) {
-    // Not even worth the space to record
-    return;
-  }
-
-  // Serial.println(currentMillis);
-  AudioSample sample;
-  sample.millis = currentMillis;
-  // Add just the frequencies of bass and drums
-  sample.spectrumValue = valueToRecord;
-  // Push adds to tail, so when we iterate we are going forward in time (oldest to newest)
-  rollingSamples.push_back(sample);
 }
 
-// Calculate the threshold for what constitutes a peak
-byte selectPeakThreshold() {
-  byte samples[rollingSamples.size()];
-  // byte maxValue = maxOfCurrentSamples();
-  // TODO filter to samples over max / 2 to save memory instead of copying and sorting all
-
-  // Copy all of the samples out of the circular buffer into a new array so that we can sort it
-  for (int i = 0; i < rollingSamples.size(); i++) {
-    samples[i] = rollingSamples[i].spectrumValue;
-  }
-  ace_sorting::shellSortKnuth(samples, rollingSamples.size());
-  // printArray(samples, rollingSamples.size());
-
-  byte startThresholdSearch = mapFromPercentile(90, 0, rollingSamples.size());
-  byte endThresholdSearch = mapFromPercentile(98, 0, rollingSamples.size());
-  byte maxSlopeIndex = startThresholdSearch;
-  // Search for a high slope among the sorted values to indicate a good threshold
-  for (int i = startThresholdSearch; i < endThresholdSearch; i++) {
-    if (samples[i] - samples[i - 1] > samples[maxSlopeIndex] - samples[maxSlopeIndex - 1]) {
-      maxSlopeIndex = i;
-    }
-  }
-
-  // Serial.println(maxSlopeIndex);
-  return samples[maxSlopeIndex];
-}
-
-// Return the times of sample data that was over the threshold
-std::vector<unsigned long> findPeaks(byte peakThreshold) {
-  std::vector<unsigned long> peakTimes;
-
-  for (int i = 1; i < rollingSamples.size(); i++) {
-    AudioSample lastSample = rollingSamples[i - 1];
-    AudioSample sample = rollingSamples[i];
-    // If the last value was below threshold and this is above threshold, count as a peak
-    if (lastSample.spectrumValue < peakThreshold
-      && sample.spectrumValue >= peakThreshold
-      && lastSample.millis < sample.millis) {
-      peakTimes.push_back(sample.millis);
-    }
-  }
-
-  return peakTimes;
-}
-
-CircularBuffer<uint16_t, 20> adjustedGapHistogram;
+const uint8_t PEAK_ROUNDING = 15;
 void fixupPeakGaps(unsigned int* peakGaps, byte size) {
   // Adjust gaps to fit into expected BPM range
   for (int i = 0; i < size; i++) {
@@ -162,31 +96,22 @@ void fixupPeakGaps(unsigned int* peakGaps, byte size) {
     }
 
     // For purpose of bucketing into histogram, floor to nearest 15
-    // TODO implement round
-    peakGaps[i] = peakGaps[i] / 15 * 15;
-
-    // Record gaps to histogram
-    adjustedGapHistogram.push(peakGaps[i]);
+    peakGaps[i] = (peakGaps[i] + PEAK_ROUNDING / 2) / PEAK_ROUNDING * PEAK_ROUNDING;
   }
 }
 
 // Get the most common gap in the histogram or 0 if we don't have confidence
-uint16_t getMostCommonGap() {
-  uint16_t sorted_gaps[adjustedGapHistogram.size()];
-  // Copy all of the samples out of the circular buffer into a new array so that we can sort it
-  for (int i = 0; i < adjustedGapHistogram.size(); i++) {
-    sorted_gaps[i] = adjustedGapHistogram[i];
-  }
-  ace_sorting::shellSortKnuth(sorted_gaps, adjustedGapHistogram.size());
+uint16_t getMostCommonGap(unsigned int * peakGaps, byte size) {
+  ace_sorting::shellSortKnuth(peakGaps, size);
   Serial.print("Sorted adjusted gaps histo: ");
-  printArray(sorted_gaps, adjustedGapHistogram.size());
+  printArray(peakGaps, size);
 
   int mostCommonItem;
   int countOfMostCommonItem = 0;
   int countOfCurrentItem = 0;
   int lastValue = 0;
-  for (int i = 0; i < adjustedGapHistogram.size(); i++) {
-    if (lastValue == sorted_gaps[i]) {
+  for (int i = 0; i < size; i++) {
+    if (lastValue == peakGaps[i]) {
       countOfCurrentItem++;
     } else {
       countOfCurrentItem = 1;
@@ -194,10 +119,10 @@ uint16_t getMostCommonGap() {
 
     if (countOfCurrentItem > countOfMostCommonItem) {
       countOfMostCommonItem = countOfCurrentItem;
-      mostCommonItem = sorted_gaps[i];
+      mostCommonItem = peakGaps[i];
     }
 
-    lastValue = sorted_gaps[i];
+    lastValue = peakGaps[i];
   }
 
   if (countOfMostCommonItem < 4) {
@@ -215,29 +140,14 @@ uint16_t getMostCommonGap() {
 void analyzeSamples() {
   Serial.println("ANALYZING SAMPLES");
 
-  // printSampleValues();
-  // printSampleTimes();
-
-  if (rollingSamples.size() < 10) {
+  printSampleTimes();
+  if (rollingPeaks.size() < 8) {
     return;
   }
-
-  byte peakThreshold = selectPeakThreshold();
-  Serial.print("Peak threshold: ");
-  Serial.println(peakThreshold);
-  if (peakThreshold < 5) {
-    // No confidence in BPM;
-    millisPerBeat = 0;
-    return;
-  }
-
-  std::vector<unsigned long> peakTimes = findPeaks(peakThreshold);
-  // printArray(peakTimes);
-
-  byte peakGapsSize = peakTimes.size() - 1;
+  byte peakGapsSize = rollingPeaks.size() - 1;
   unsigned int peakGaps[peakGapsSize];
   for (int i = 0; i < peakGapsSize; i++) {
-    peakGaps[i] = peakTimes[i + 1] - peakTimes[i];
+    peakGaps[i] = rollingPeaks[i + 1] - rollingPeaks[i];
   }
   Serial.print("Gaps: ");
   printArray(peakGaps, peakGapsSize);
@@ -247,16 +157,9 @@ void analyzeSamples() {
   Serial.print("Adjusted gaps: ");
   printArray(peakGaps, peakGapsSize);
 
-  // Serial.print("Adjust gap histo: ");
-  // for (uint16_t i = 0; i < adjustedGapHistogram.size(); i++) {
-  //   Serial.print(adjustedGapHistogram[i]);
-  //   Serial.print(' ');
-  // }
-  // Serial.println();
-
   // Update global beat tracking with either the high confident beat gap or
   // 0 to indicate we don't have confidence
-  millisPerBeat = getMostCommonGap();
+  millisPerBeat = getMostCommonGap(peakGaps, peakGapsSize);
 
   if (millisPerBeat == 0) {
     // No confidence in BPM
@@ -270,7 +173,7 @@ void analyzeSamples() {
   // (possibly is from a past analysis but still in the histo)
   for (int i = 0; i < peakGapsSize; i++) {
     if (peakGaps[i] == millisPerBeat) {
-      lastConfidentBeatTimeMillis = peakTimes[i + 1];
+      lastConfidentBeatTimeMillis = rollingPeaks[i + 1];
       Serial.print("Found confident beat time: ");
       Serial.println(lastConfidentBeatTimeMillis);
     }
@@ -350,8 +253,16 @@ void doAnalogs() {
     spectrumDecay[i] = (1.0 - SPECTRUMSMOOTH) * spectrumDecay[i] + SPECTRUMSMOOTH * spectrumValue[i];
 
     // process peak values
-    spectrumPeaks[i] = std::max(spectrumPeaks[i], spectrumDecay[i]) * PEAKDECAY;
+    spectrumPeaks[i] = std::max(spectrumPeaks[i] * PEAKDECAY, spectrumDecay[i]);
   }
+
+  if (lastBassValue > spectrumValue[1] && spectrumValue[1] > spectrumPeaks[1] * 1.50f && currentMillis > lastLocalBassPeakMillis + MIN_MILLIS_PER_BEAT / 4) {
+    isLocalBassPeak = true;
+    lastLocalBassPeakMillis = currentMillis;
+  } else {
+    isLocalBassPeak = false;
+  }
+  lastBassValue = spectrumValue[1];
 
   // Calculate audio levels for automatic gain
   audioAvg = (1.0 - AGCSMOOTH) * audioAvg + AGCSMOOTH * (analogsum / 7.0);
@@ -369,9 +280,8 @@ void doAnalogs() {
   // Analyze samples to determine BPM every ~3 seconds
   if (currentMillis - lastSampleAnalysis > SAMPLE_WINDOW_MILLIS) {
     lastSampleAnalysis = currentMillis;
-    // analyzeSamples();
-    rollingSamples.clear();
+    analyzeSamples();
   }
 
-  // updateBeats();
+  updateBeats();
 }
