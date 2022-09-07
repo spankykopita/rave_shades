@@ -341,7 +341,7 @@ void audioShadesOutline() {
 
   static uint8_t beatcount = 0;
 
-  int brightness = min(spectrumDecay[0] + spectrumDecay[1], 255);
+  int brightness = std::min(static_cast<int>(spectrumDecay[0] + spectrumDecay[1]), 255);
 
   CRGB pixelColor = CHSV(cycleHue, 255, brightness);
   

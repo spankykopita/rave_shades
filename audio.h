@@ -51,7 +51,7 @@ float averageOfCurrentValues() {
 float maxOfCurrentValues() {
   unsigned int maxVal = 0;
   for (int i = 0; i < 7; i++) {
-    maxVal = max(maxVal, spectrumValue[i]);
+    maxVal = std::max(maxVal, spectrumValue[i]);
   }
   return maxVal;
 }
@@ -75,13 +75,13 @@ long lastSampleAnalysis = 0;
 float maxOfCurrentSamples() {
   byte maxValue = 0;
   for (uint16_t i = 0; i < rollingSamples.size(); i++) {
-    maxValue = max(rollingSamples[i].spectrumValue, maxValue);
+    maxValue = std::max(rollingSamples[i].spectrumValue, maxValue);
   }
   return maxValue;
 }
 
 void recordSample() {
-  unsigned int value = spectrumValue[1]; // + spectrumValue[5];
+  unsigned int value = spectrumValue[1];
   if (value > maxSample) {
     maxSample = value;
   }
@@ -89,11 +89,14 @@ void recordSample() {
   // values relative to each other. Since I don't know what the max possible value to get
   // from the mic is, just record what the largest sample is. Hopefully this stabilizes
   // quickly and isn't outrageously huge, or else the relative gap between values will be lost.
-  byte valueToRecord = mapToByteRange(value, 0, maxSample);
+  uint8_t valueToRecord = mapToByteRange(value, 0, maxSample);
+  if (valueToRecord < 5) {
+    // Not even worth the space to record
+    return;
+  }
 
   // Serial.println(currentMillis);
   AudioSample sample;
-  // Floor to 10 millisecond increments to simplify the eventual histogram
   sample.millis = currentMillis;
   // Add just the frequencies of bass and drums
   sample.spectrumValue = valueToRecord;
@@ -129,10 +132,8 @@ byte selectPeakThreshold() {
 }
 
 // Return the times of sample data that was over the threshold
-Vector<unsigned long> findPeaks(byte peakThreshold) {
-  // This is kinda dangerous because we don't know how many peaks we'll find. C sucks.
-  unsigned long peakTimesStorage[MAX_NUMBER_OF_SAMPLES / 10];
-  Vector<unsigned long> peakTimes(peakTimesStorage);
+std::vector<unsigned long> findPeaks(byte peakThreshold) {
+  std::vector<unsigned long> peakTimes;
 
   for (int i = 1; i < rollingSamples.size(); i++) {
     AudioSample lastSample = rollingSamples[i - 1];
@@ -230,7 +231,7 @@ void analyzeSamples() {
     return;
   }
 
-  Vector<unsigned long> peakTimes = findPeaks(peakThreshold);
+  std::vector<unsigned long> peakTimes = findPeaks(peakThreshold);
   // printArray(peakTimes);
 
   byte peakGapsSize = peakTimes.size() - 1;
@@ -349,7 +350,7 @@ void doAnalogs() {
     spectrumDecay[i] = (1.0 - SPECTRUMSMOOTH) * spectrumDecay[i] + SPECTRUMSMOOTH * spectrumValue[i];
 
     // process peak values
-    spectrumPeaks[i] = max(spectrumPeaks[i], spectrumDecay[i]) * PEAKDECAY;
+    spectrumPeaks[i] = std::max(spectrumPeaks[i], spectrumDecay[i]) * PEAKDECAY;
   }
 
   // Calculate audio levels for automatic gain
@@ -368,9 +369,9 @@ void doAnalogs() {
   // Analyze samples to determine BPM every ~3 seconds
   if (currentMillis - lastSampleAnalysis > SAMPLE_WINDOW_MILLIS) {
     lastSampleAnalysis = currentMillis;
-    analyzeSamples();
+    // analyzeSamples();
     rollingSamples.clear();
   }
 
-  updateBeats();
+  // updateBeats();
 }

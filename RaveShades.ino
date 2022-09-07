@@ -56,11 +56,10 @@
 #define EEPROMDELAY 2000
 
 // Include FastLED library and other useful files
+#include <Arduino.h>
 #include <FastLED.h>
 #include <EEPROM.h>
-#include <Arduino.h>
-#include <Array.h>
-#include <Vector.h>
+#include <ArduinoSTL.h>
 #include <CircularBuffer.h>
 #include <AceSorting.h>
 #include <math.h>

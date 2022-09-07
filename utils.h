@@ -3,7 +3,7 @@
 class AudioSample {
   public:
     unsigned long millis;
-    byte spectrumValue;
+    uint8_t spectrumValue;
 };
 
 // Global variables
@@ -29,7 +29,7 @@ const byte GAP_BETWEEN_SAMPLES_MILLIS = 20;
 const uint16_t MAX_NUMBER_OF_SAMPLES = SAMPLE_WINDOW_MILLIS / GAP_BETWEEN_SAMPLES_MILLIS;
 
 unsigned int maxSample;
-Array<AudioSample, MAX_NUMBER_OF_SAMPLES> rollingSamples; // Audio samples for beat detection
+std::vector<AudioSample> rollingSamples; // Audio samples for beat detection
 
 uint16_t millisPerBeat = 0;
 unsigned long lastConfidentBeatTimeMillis = 0;
@@ -287,15 +287,7 @@ void printArray(float* array, uint16_t arraySize) {
   Serial.println();
 }
 
-void printArray(Array<unsigned long, 125UL> array) {
-  for (uint16_t i = 0; i < array.size(); i++) {
-    Serial.print(array[i]);
-    Serial.print(' ');
-  }
-  Serial.println();
-}
-
-void printArray(Vector<unsigned long> array) {
+void printArray(std::vector<unsigned long> array) {
   for (uint16_t i = 0; i < array.size(); i++) {
     Serial.print(array[i]);
     Serial.print(' ');
