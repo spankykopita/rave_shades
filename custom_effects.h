@@ -63,6 +63,23 @@ void customAnalyzer() {
   overlayTopLineBeatPrediction();
 }
 
+uint8_t mapToBassPeaks(long value, long fromLow, long fromHigh, long toMillisHigh) {
+  long targetMillis = currentMillis - map(value, fromLow, fromHigh, 0, toMillisHigh);
+  for (int i = rollingPeaks.size() - 1; i >= 0; i--) {
+    if (targetMillis >= rollingPeaks[i]) {
+      // That means our target time we're trying to find the value of came after this bass peak,
+      // so we need to calculate the easing down to 0 from that peak and where the target time falls
+      uint32_t fadeEnd = rollingPeaks[i] + 200;
+      if (targetMillis > fadeEnd) {
+        return 10;
+      }
+      return map(targetMillis, fadeEnd, rollingPeaks[i], 10, 150);
+    }
+  }
+
+  return 10;
+}
+
 void pulseSpiral() {
   // startup tasks
   if (effectInit == false) {
@@ -85,12 +102,16 @@ void pulseSpiral() {
       float theta = atan2f(adjustedX, adjustedY);
       float distance = sqrt(adjustedX * adjustedX + adjustedY * adjustedY);
 
-      uint8_t pixelPaletteIndex = mapToByteRange((theta + distance) * 100, (-PI + 0) * 100, (PI + 5) * 100);
+      uint8_t pixelPaletteIndex = mapToByteRange((theta + distance) * 100, (-PI + 0) * 100, (PI + 5) * 100) - currentMillis / 8;
+      uint8_t pixelBrightness = mapToBassPeaks(distance * 100, 0, 5 * 100, 600);
 
-      pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, 150);
+      pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
 
       leds[XY(x, y)] = pixelColor;
       leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
   }
+  
+  overlaySideBeat();
+  overlayTopLineBeatPrediction();
 }
