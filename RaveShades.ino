@@ -90,7 +90,7 @@ functionList effectList[] = {
   // sideRain
 
   // CUSTOM
-  customAnalyzer,
+  // customAnalyzer,
   pulseSpiral,
 };
 
