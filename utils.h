@@ -10,7 +10,7 @@ uint32_t hueMillis; // store time of last hue change
 uint32_t eepromMillis; // store time of last setting change
 uint32_t audioMillis; // store time of last audio update
 byte currentEffect = 0; // index to the currently running effect
-boolean autoCycle = false; // flag for automatic effect changes
+boolean autoCycle = true; // flag for automatic effect changes
 boolean eepromOutdated = false; // flag for when EEPROM may need to be updated
 byte currentBrightness = STARTBRIGHTNESS; // 0-255 will be scaled to 0-MAXBRIGHTNESS
 boolean audioEnabled = true; // flag for running audio patterns
@@ -164,7 +164,7 @@ void checkEEPROM() {
     if (currentMillis - eepromMillis > EEPROMDELAY) {
       updateEEPROM(0, 99);
       updateEEPROM(1, currentEffect);
-      // updateEEPROM(2, autoCycle);
+      updateEEPROM(2, autoCycle);
       updateEEPROM(3, currentBrightness);
       updateEEPROM(4, audioEnabled);
       eepromOutdated = false;

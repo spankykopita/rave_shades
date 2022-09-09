@@ -162,7 +162,7 @@ void confetti() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 10;
-    selectRandomPalette();
+    selectRandomAudioPalette();
     fadeActive = 1;
   }
 

@@ -105,7 +105,7 @@ void setup() {
   byte eepromWasWritten = EEPROM.read(0);
   if (eepromWasWritten == 99) {
     currentEffect = EEPROM.read(1);
-    // autoCycle = EEPROM.read(2);
+    autoCycle = EEPROM.read(2);
     currentBrightness = EEPROM.read(3);
     audioEnabled = EEPROM.read(4);
   }

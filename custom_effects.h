@@ -32,6 +32,7 @@ void overlayTopLineBeatPrediction() {
 }
 
 uint8_t mapToBassPeaks(long value, long fromLow, long fromHigh, long toMillisHigh) {
+  uint8_t lowBrightness = 20;
   long targetMillis = currentMillis - map(value, fromLow, fromHigh, 0, toMillisHigh);
   for (int i = rollingPeaks.size() - 1; i >= 0; i--) {
     if (targetMillis >= rollingPeaks[i]) {
@@ -39,13 +40,13 @@ uint8_t mapToBassPeaks(long value, long fromLow, long fromHigh, long toMillisHig
       // so we need to calculate the easing down to 0 from that peak and where the target time falls
       uint32_t fadeEnd = rollingPeaks[i] + 250;
       if (targetMillis > fadeEnd) {
-        return 10;
+        return lowBrightness;
       }
-      return map(targetMillis, fadeEnd, rollingPeaks[i], 10, 170);
+      return map(targetMillis, fadeEnd, rollingPeaks[i], lowBrightness, 170);
     }
   }
 
-  return 10;
+  return lowBrightness;
 }
 
 void customAnalyzer() {
@@ -98,9 +99,9 @@ void pulseSpiral() {
       int adjustedY = y - 2;
       // From -PI to PI
       float theta = atan2f(adjustedX, adjustedY);
-      float distance = sqrt(adjustedX * adjustedX + adjustedY * adjustedY);
+      float distance = hypot(adjustedX, adjustedY);
 
-      uint8_t pixelPaletteIndex = mapToByteRange((theta + distance) * 100, (-PI + 0) * 100, (PI + 5) * 100) - currentMillis / 8;
+      uint8_t pixelPaletteIndex = mapToByteRange((theta + distance) * 100, (-PI + 0) * 100, (PI + 5) * 100) - currentMillis / 6;
       uint8_t pixelBrightness = mapToBassPeaks(distance * 100, 0, 5 * 100, 400);
       // uint8_t pixelBrightness = mapFromByteRange(pixelPaletteIndex, 0, 150);
 
