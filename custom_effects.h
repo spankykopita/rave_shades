@@ -101,7 +101,7 @@ void pulseSpiral() {
       float theta = atan2f(adjustedX, adjustedY);
       float distance = hypot(adjustedX, adjustedY);
 
-      uint8_t pixelPaletteIndex = mapToByteRange((theta + distance) * 100, (-PI + 0) * 100, (PI + 5) * 100) - currentMillis / 6;
+      uint8_t pixelPaletteIndex = mapToByteRange((theta + distance) * 100, (-PI + 0) * 100, (PI + 5) * 100) - currentMillis / 8;
       uint8_t pixelBrightness = mapToBassPeaks(distance * 100, 0, 5 * 100, 400);
       // uint8_t pixelBrightness = mapFromByteRange(pixelPaletteIndex, 0, 150);
 

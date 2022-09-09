@@ -73,12 +73,12 @@
 // list of functions that will be displayed
 functionList effectList[] = {
   // AUDIO
-  // rings,
-  // audioShadesOutline,
-  // audioStripes,
-  // audioCirc,
-  // drawVU,
-  // drawAnalyzer
+  rings,
+  audioShadesOutline,
+  audioStripes,
+  audioCirc,
+  drawVU,
+  drawAnalyzer,
 
   // NO AUDIO
   // threeSine,
@@ -87,7 +87,7 @@ functionList effectList[] = {
   // glitter,
   // slantBars,
   // colorFill,
-  // sideRain
+  // sideRain,
 
   // CUSTOM
   customAnalyzer,

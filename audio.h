@@ -107,7 +107,7 @@ const uint8_t PEAK_ROUNDING = 15;
 void fixupPeakGaps(unsigned int* peakGaps, byte size) {
   // Adjust gaps to fit into expected BPM range
   for (int i = 0; i < size; i++) {
-    while (!(MIN_MILLIS_PER_BEAT < peakGaps[i] && peakGaps[i] < MAX_MILLIS_PER_BEAT)) {
+    while (!(MIN_MILLIS_PER_BEAT <= peakGaps[i] && peakGaps[i] <= MAX_MILLIS_PER_BEAT)) {
       if (peakGaps[i] < MIN_MILLIS_PER_BEAT) {
         peakGaps[i] *= 2;
       } else {
