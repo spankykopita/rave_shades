@@ -9,12 +9,11 @@
 void overlaySideBeat() {
   if (isLocalBassPeak) {
     for (int i = 0; i < SIDESIZE; i++) {
-      leds[SideTable[i]] = ColorFromPalette(currentPalette, 150);
+      leds[SideTable[i]] = ColorFromPalette(currentOverlayPalette, 150);
     }
   }
 }
 
-uint32_t travelSwitchMillis;
 void overlayTopLineBeatPrediction() {
   if (hasPredictedBeat()) {
     // Serial.print("Predictions: ");
@@ -28,7 +27,7 @@ void overlayTopLineBeatPrediction() {
     byte activeLED = travelRight ?
       mapFromByteRange(easedTimeBetweenBeats, 0, 13) :
       mapFromByteRange(easedTimeBetweenBeats, 13, 0);
-    leds[activeLED] = ColorFromPalette(currentPalette, 150, 150);
+    leds[activeLED] = ColorFromPalette(currentOverlayPalette, 150, 150);
   }
 }
 

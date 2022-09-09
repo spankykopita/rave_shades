@@ -151,6 +151,7 @@ void loop() {
     cycleMillis = currentMillis;
     // Pick a new palette target to fade towards
     nextPalette = getRandomAudioPalette();
+    nextOverlayPalette = getRandomAudioPalette();
     if (autoCycle == true) {
       if (++currentEffect >= numEffects) currentEffect = 0; // loop to start of effect list
       effectInit = false; // trigger effect initialization when new effect is selected
@@ -160,6 +161,7 @@ void loop() {
   if (currentMillis - paletteBlendMillis > 100) {
     paletteBlendMillis = currentMillis;
     nblendPaletteTowardPalette(currentPalette, nextPalette, 80);
+    nblendPaletteTowardPalette(currentOverlayPalette, nextOverlayPalette, 80);
   }
 
   // increment the global hue value every hueTime milliseconds

@@ -21,6 +21,8 @@ CircularBuffer<uint32_t, 20> rollingPeaks;
 
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 CRGBPalette16 nextPalette(RainbowColors_p); // global palette storage
+CRGBPalette16 currentOverlayPalette(RainbowColors_p); // global palette storage
+CRGBPalette16 nextOverlayPalette(RainbowColors_p); // global palette storage
 
 typedef void (*functionList)(); // definition for list of effect function pointers
 // extern byte numEffects;
@@ -74,41 +76,6 @@ void mirrorArray() {
   }
 }
 
-// Pick a random palette from a list
-void selectRandomPalette() {
-
-  switch(random8(8)) {
-    case 0:
-    currentPalette = CloudColors_p;
-    break;
-    
-    case 1:
-    currentPalette = LavaColors_p;
-    break;
-    
-    case 2:
-    currentPalette = OceanColors_p;
-    break;
-    
-    case 4:
-    currentPalette = ForestColors_p;
-    break;
-    
-    case 5:
-    currentPalette = RainbowColors_p;
-    break;
-    
-    case 6:
-    currentPalette = PartyColors_p;
-    break;
-    
-    case 7:
-    currentPalette = HeatColors_p;
-    break;
-  }
-
-}
-
 CRGBPalette16 getRandomAudioPalette() {
   switch (random8(8))
   {
@@ -132,6 +99,10 @@ CRGBPalette16 getRandomAudioPalette() {
 // Pick a random palette from a list
 void selectRandomAudioPalette() {
   currentPalette = getRandomAudioPalette();
+}
+
+void selectRandomOverlayAudioPalette() {
+  currentOverlayPalette = getRandomAudioPalette();
 }
 
 void selectRandomNoisePalette() {
