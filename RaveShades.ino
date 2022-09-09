@@ -90,7 +90,7 @@ functionList effectList[] = {
   // sideRain
 
   // CUSTOM
-  // customAnalyzer,
+  customAnalyzer,
   pulseSpiral,
 };
 
@@ -141,11 +141,9 @@ void loop() {
   checkEEPROM();            // update the EEPROM if necessary
 
   // analyze the audio input
-  if (audioActive) {
-    if (currentMillis - audioMillis > AUDIODELAY) {
-      audioMillis = currentMillis;
-      doAnalogs();
-    }
+  if (currentMillis - audioMillis > AUDIODELAY) {
+    audioMillis = currentMillis;
+    doAnalogs();
   }
 
   // switch to a new effect every cycleTime milliseconds
@@ -153,11 +151,10 @@ void loop() {
     cycleMillis = currentMillis;
     // Pick a new palette target to fade towards
     nextPalette = getRandomAudioPalette();
-    // if (autoCycle == true) {
-    //   if (++currentEffect >= numEffects) currentEffect = 0; // loop to start of effect list
-    //   effectInit = false; // trigger effect initialization when new effect is selected
-    //   audioActive = false;
-    // }
+    if (autoCycle == true) {
+      if (++currentEffect >= numEffects) currentEffect = 0; // loop to start of effect list
+      effectInit = false; // trigger effect initialization when new effect is selected
+    }
   }
   
   if (currentMillis - paletteBlendMillis > 100) {

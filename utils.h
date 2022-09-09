@@ -14,7 +14,6 @@ boolean autoCycle = false; // flag for automatic effect changes
 boolean eepromOutdated = false; // flag for when EEPROM may need to be updated
 byte currentBrightness = STARTBRIGHTNESS; // 0-255 will be scaled to 0-MAXBRIGHTNESS
 boolean audioEnabled = true; // flag for running audio patterns
-boolean audioActive = false;
 uint8_t fadeActive = 0;
 
 unsigned int maxSample;

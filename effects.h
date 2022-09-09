@@ -205,7 +205,6 @@ void drawAnalyzer() {
     effectInit = true;
     effectDelay = 10;
     selectRandomAudioPalette();
-    audioActive = true;
     fadeActive = 0;
   }
 
@@ -238,7 +237,6 @@ void drawVU() {
     effectInit = true;
     effectDelay = 10;
     selectRandomAudioPalette();
-    audioActive = true;
     fadeActive = 0;
   }
 
@@ -266,7 +264,6 @@ void audioCirc() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 10;
-    audioActive = true;
     fadeActive = 0;
   }
 
@@ -299,7 +296,6 @@ void audioStripes() {
     effectDelay = 25;
     selectRandomAudioPalette();
     fadeActive = 0;
-    audioActive = true;
   }
 
   CRGB linecolor;
@@ -336,7 +332,6 @@ void audioShadesOutline() {
     FastLED.clear();
     currentPalette = RainbowColors_p;
     fadeActive = 10;
-    audioActive = true;
   }
 
   static uint8_t beatcount = 0;
@@ -389,7 +384,6 @@ void rings() {
     effectInit = true;
     effectDelay = 10;
     fadeActive = 0;
-    audioActive = true;
   }
 
 

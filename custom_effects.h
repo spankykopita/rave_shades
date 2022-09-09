@@ -55,7 +55,6 @@ void customAnalyzer() {
     effectInit = true;
     effectDelay = 10;
     selectRandomAudioPalette();
-    audioActive = true;
     fadeActive = 0;
   }
 
@@ -87,7 +86,6 @@ void pulseSpiral() {
     effectInit = true;
     effectDelay = 10;
     selectRandomAudioPalette();
-    audioActive = true;
     fadeActive = 0;
   }
 
