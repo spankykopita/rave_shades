@@ -41,6 +41,7 @@ const uint8_t kMatrixHeight = 5;
 
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
 CRGB leds[ NUM_LEDS ];
+CRGB overlay_leds[ NUM_LEDS ];
 
 
 // This function will return the right 'led index number' for 

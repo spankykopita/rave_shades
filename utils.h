@@ -16,7 +16,6 @@ byte currentBrightness = STARTBRIGHTNESS; // 0-255 will be scaled to 0-MAXBRIGHT
 boolean audioEnabled = true; // flag for running audio patterns
 uint8_t fadeActive = 0;
 
-unsigned int maxSample;
 CircularBuffer<uint32_t, 20> rollingPeaks;
 
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
@@ -75,6 +74,12 @@ void mirrorArray() {
     }
   }
 }
+
+// void setAllVisibleBrightnessTo(uint8_t brightness) {
+//   for (byte i = 0; i < NUM_LEDS; i++) {
+//     leds[i].setHSV(leds[i].hue * brightness/255.0, leds[i].green, leds[i].blue);
+//   }
+// }
 
 CRGBPalette16 getRandomAudioPalette() {
   switch (random8(8))
@@ -216,6 +221,10 @@ long mapFromByteRange(long value, long toLow, long toHigh) {
 
 long mapFromPercentile(long percentile, long toLow, long toHigh) {
   return map(percentile, 0, 100, toLow, toHigh);
+}
+
+long mapToMillisAgo(long value, long fromLow, long fromHigh, long toMillisHigh) {
+  return map(value, fromLow, fromHigh, 0, toMillisHigh);
 }
 
 // Print given array.

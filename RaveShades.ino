@@ -74,20 +74,19 @@
 functionList effectList[] = {
   // AUDIO
   audioShadesOutline,
-  drawVU,
+  // drawVU,
 
   // NO AUDIO
   // threeSine,
   // confetti,
-  // rider,
-  // glitter,
-  // slantBars,
-  // colorFill,
-  // sideRain,
+  slantBars,
+  colorFill,
 
   // CUSTOM
   customAnalyzer,
   pulseSpiral,
+  rider,
+  sideRain,
 };
 
 const byte numEffects = (sizeof(effectList) / sizeof(effectList[0]));

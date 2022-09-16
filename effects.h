@@ -36,54 +36,6 @@ void threeSine() {
 
 }
 
-// Scanning pattern left/right, uses global hue cycle
-void rider() {
-
-  static byte riderPos = 0;
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 5;
-    riderPos = 0;
-    fadeActive = 0;
-  }
-
-  // Draw one frame of the animation into the LED array
-  for (byte x = 0; x < kMatrixWidth; x++) {
-    int brightness = abs(x * (256 / kMatrixWidth) - triwave8(riderPos) * 2 + 127) * 3;
-    if (brightness > 255) brightness = 255;
-    brightness = 255 - brightness;
-    CRGB riderColor = CHSV(cycleHue, 255, brightness);
-    for (byte y = 0; y < kMatrixHeight; y++) {
-      leds[XY(x, y)] = riderColor;
-    }
-  }
-
-  riderPos++; // byte wraps to 0 at 255, triwave8 is also 0-255 periodic
-
-}
-
-
-// Shimmering noise, uses global hue cycle
-void glitter() {
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 15;
-    fadeActive = 0;
-  }
-
-  // Draw one frame of the animation into the LED array
-  for (int x = 0; x < kMatrixWidth; x++) {
-    for (int y = 0; y < kMatrixHeight; y++) {
-      leds[XY(x, y)] = CHSV(cycleHue, 255, random8(5) * 63);
-    }
-  }
-}
-
-
 // Fills saturated colors into the array from alternating directions
 void colorFill() {
 
@@ -137,23 +89,6 @@ void colorFill() {
 
 }
 
-// Random pixels scroll sideways, uses current hue
-#define rainDir 0
-void sideRain() {
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 30;
-    fadeActive = 0;
-  }
-
-  scrollArray(rainDir);
-  byte randPixel = random8(kMatrixHeight);
-  for (byte y = 0; y < kMatrixHeight; y++) leds[XY((kMatrixWidth - 1) * rainDir, y)] = CRGB::Black;
-  leds[XY((kMatrixWidth - 1)*rainDir, randPixel)] = CHSV(cycleHue, 255, 255);
-}
-
 // Pixels with random locations and random colors selected from a palette
 // Use with the fadeAll function to allow old pixels to decay
 void confetti() {
@@ -163,37 +98,16 @@ void confetti() {
     effectInit = true;
     effectDelay = 10;
     selectRandomAudioPalette();
-    fadeActive = 1;
+    fadeActive = 10;
   }
+  byte brightness = map(spectrumDecay[1], 300, spectrumPeaks[1], 0, 255);
 
   // scatter random colored pixels at several random coordinates
   for (byte i = 0; i < 4; i++) {
-    leds[XY(random16(kMatrixWidth), random16(kMatrixHeight))] = ColorFromPalette(currentPalette, random16(255), 255); //CHSV(random16(255), 255, 255);
+    leds[XY(random16(kMatrixWidth), random16(kMatrixHeight))] = ColorFromPalette(currentPalette, random16(255), brightness); //CHSV(random16(255), 255, 255);
     random16_add_entropy(1);
   }
 
-}
-
-
-// Draw slanting bars scrolling across the array, uses current hue
-void slantBars() {
-
-  static byte slantPos = 0;
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 5;
-    fadeActive = 0;
-  }
-
-  for (byte x = 0; x < kMatrixWidth; x++) {
-    for (byte y = 0; y < kMatrixHeight; y++) {
-      leds[XY(x, y)] = CHSV(cycleHue, 255, sin8(x * 32 + y * 32 + slantPos));
-    }
-  }
-
-  slantPos -= 4;
 }
 
 #define VUFadeFactor 5
@@ -241,8 +155,6 @@ void audioShadesOutline() {
     fadeActive = 10;
   }
 
-  static uint8_t beatcount = 0;
-
   int brightness = std::min(static_cast<int>(spectrumDecay[0] + spectrumDecay[1]), 255);
 
   CRGB pixelColor = CHSV(cycleHue, 255, brightness);
@@ -251,7 +163,7 @@ void audioShadesOutline() {
     leds[OutlineMap(x+(OUTLINESIZE/4-1)*k)] += pixelColor;
   }
 
-  x += constrain((spectrumDecay[0] + spectrumDecay[1]) / 600.0, 0.1, 1.0);
+  x += constrain((spectrumDecay[0] + spectrumDecay[1]) / 600.0, 0.1, 0.6);
   
   if (x > (OUTLINESIZE-1)) x = 0;
   if (x < 0) x = OUTLINESIZE - 1;

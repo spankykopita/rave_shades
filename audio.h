@@ -38,6 +38,8 @@ uint32_t lastLocalBassPeakMillis = 0;
 unsigned int lastBassValue = 0;
 boolean isLocalBassPeak = false;
 
+unsigned int maxBassValue = 0;
+
 float averageOfCurrentPeaks() {
   unsigned int spectrumSum = 0;
   for (int i = 0; i < 7; i++) {
@@ -268,6 +270,12 @@ void doAnalogs() {
     isLocalBassPeak = false;
   }
   lastBassValue = spectrumValue[1];
+
+  // if (spectrumValue[1] > maxBassValue) {
+  //   maxBassValue = spectrumValue[1];
+  //   Serial.print("New max bass: ");
+  //   Serial.println(maxBassValue);
+  // }
 
   // Calculate audio levels for automatic gain
   audioAvg = (1.0 - AGCSMOOTH) * audioAvg + AGCSMOOTH * (analogsum / 7.0);
