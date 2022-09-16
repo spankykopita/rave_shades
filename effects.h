@@ -196,38 +196,6 @@ void slantBars() {
   slantPos -= 4;
 }
 
-#define analyzerFadeFactor 5
-#define analyzerScaleFactor 1.5
-#define analyzerPaletteFactor 2
-void drawAnalyzer() {
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 10;
-    selectRandomAudioPalette();
-    fadeActive = 0;
-  }
-
-  CRGB pixelColor;
-
-  const float yScale = 255.0 / kMatrixHeight;
-
-  for (byte x = 0; x < kMatrixWidth / 2; x++) {
-    int freqVal = spectrumDecay[x];
-    
-    for (byte y = 0; y < kMatrixHeight; y++) {
-      int senseValue = freqVal / analyzerScaleFactor - yScale * (kMatrixHeight - 1 - y);
-      int pixelBrightness = constrain(senseValue * analyzerFadeFactor, 0, 255);
-      int pixelPaletteIndex = constrain(senseValue / analyzerPaletteFactor - 15, 0, 240);
-
-      pixelColor = ColorFromPalette(currentPalette, pixelPaletteIndex, pixelBrightness);
-
-      leds[XY(x, y)] = pixelColor;
-      leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
-    }
-  }
-}
-
 #define VUFadeFactor 5
 #define VUScaleFactor 2.0
 #define VUPaletteFactor 1.5
@@ -258,67 +226,6 @@ void drawVU() {
     }
   }
 }
-
-void audioCirc() {
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 10;
-    fadeActive = 0;
-  }
-
-  int lowfreq; int medfreq; int hifreq;
-
-  for (byte x = 0; x < kMatrixWidth; x++) {
-    for (int y = 0; y < kMatrixHeight; y++) {
-      lowfreq = spectrumValue[0]/(hypot(x-7.5, y-2)*1.5);
-      medfreq = spectrumDecay[2]/(hypot(x-7.5, y-2)*1.1);
-      hifreq = spectrumDecay[5]/(hypot(x-7.5, y-2)*1.2);
-
-      if (lowfreq < 90) lowfreq = 0;
-      if (lowfreq > 255) lowfreq = 255;
-
-      if (medfreq < 60) medfreq = 0;
-      if (medfreq > 255) medfreq = 255;
-
-      if (hifreq < 60) hifreq = 0;
-      if (hifreq > 255) hifreq = 255;
-      
-      leds[XY(x,y)] = CRGB(lowfreq, medfreq, hifreq);
-    }
-  }
-}
-
-void audioStripes() {
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 25;
-    selectRandomAudioPalette();
-    fadeActive = 0;
-  }
-
-  CRGB linecolor;
-  int audioLevel;
-  int brightLevel;
-
-  for (byte y = 0; y < 5; y++) {
-
-    //audioLevel = spectrumDecay[y+1] / 2.0;
-    audioLevel = spectrumPeaks[y+1] / 1.8;
-    if (y == 0) audioLevel /= 2;
-    if (audioLevel > 239) audioLevel = 239;
-
-    for (byte x = 0; x < kMatrixWidth; x++) {
-      brightLevel = (audioLevel-(abs(7.5-x)*20)) * 3.0;
-      if (brightLevel < 0) brightLevel = 0;
-      if (brightLevel > 254) brightLevel = 254;
-      linecolor = ColorFromPalette(currentPalette, audioLevel, brightLevel);
-      leds[XY(x, 4-y)] = linecolor;
-    }
-  }
-}
-
 
 //leds run around the periphery of the shades
 void audioShadesOutline() {
@@ -367,65 +274,4 @@ void drawRing(int xCenter, int yCenter, float radius, CRGB color) {
       leds[XY(x, y)] += tempColor.nscale8(brightness);
     }
   }
-}
-
-void rings() {
-
-  static float offset  = 0; // counter for radial color wave motion
-  static uint16_t plasVector = 0; // counter for orbiting plasma center
-
-
-  #define RING_GAINSMOOTH 0.01
-  static float ringavg1 = 500, ringavg2 = 500, ringavg3 = 500;
-  float ringval1, ringval2, ringval3;
-
-  // startup tasks
-  if (effectInit == false) {
-    effectInit = true;
-    effectDelay = 10;
-    fadeActive = 0;
-  }
-
-
-  // Calculate current center of plasma pattern (can be offscreen)
-  int xOffset;
-  int yOffset;
-
-  fillAll(0);
-
-
-
-  ringval1 = spectrumDecay[0] + spectrumDecay[1] + spectrumDecay[2];
-  ringval2 = spectrumDecay[3] + spectrumDecay[4];
-  ringval3 = spectrumDecay[5] + spectrumDecay[6];
-
-  ringavg1 = ringavg1 * (1.0 - RING_GAINSMOOTH) + ringval1 * RING_GAINSMOOTH;
-  ringavg2 = ringavg2 * (1.0 - RING_GAINSMOOTH) + ringval2 * RING_GAINSMOOTH;
-  ringavg3 = ringavg3 * (1.0 - RING_GAINSMOOTH) + ringval3 * RING_GAINSMOOTH;
-
-  float ring_gain1 = (6.0/ringavg1);
-  float ring_gain2 = (6.0/ringavg2);
-  float ring_gain3 = (5.0/ringavg3);
-
-  if (ring_gain1 > 0.05) ring_gain1 = 0.05;
-  if (ring_gain2 > 0.05) ring_gain2 = 0.05;
-  if (ring_gain3 > 0.05) ring_gain3 = 0.05;
-
-  xOffset = cos16(plasVector);
-  yOffset = sin16(plasVector);
-  drawRing(xOffset/24,yOffset/24, ringval1 * ring_gain1, CRGB::Red);
-
-  xOffset = cos16(plasVector+65535*0.33);
-  yOffset = sin16(plasVector+65535*0.33);
-    drawRing(xOffset/24,yOffset/24, ringval2 * ring_gain2, CRGB::Green);
-
-
-  xOffset = cos16(plasVector+65535*0.66);
-  yOffset = sin16(plasVector+65535*0.66);
-  drawRing(xOffset/24,yOffset/24, ringval3 * ring_gain2, CRGB::Blue);
-
-
-  offset += 0.2;
-  plasVector += 256; // using an int for slower orbit (wraps at 65536)
-
 }

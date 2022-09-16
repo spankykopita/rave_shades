@@ -31,8 +31,8 @@ void overlayTopLineBeatPrediction() {
   }
 }
 
+#define lowBrightness 20
 uint8_t mapToBassPeaks(long value, long fromLow, long fromHigh, long toMillisHigh) {
-  uint8_t lowBrightness = 20;
   long targetMillis = currentMillis - map(value, fromLow, fromHigh, 0, toMillisHigh);
   for (int i = rollingPeaks.size() - 1; i >= 0; i--) {
     if (targetMillis >= rollingPeaks[i]) {
@@ -49,6 +49,9 @@ uint8_t mapToBassPeaks(long value, long fromLow, long fromHigh, long toMillisHig
   return lowBrightness;
 }
 
+#define analyzerFadeFactor 5
+#define analyzerScaleFactor 1.5
+#define analyzerPaletteFactor 2
 void customAnalyzer() {
   // startup tasks
   if (effectInit == false) {
